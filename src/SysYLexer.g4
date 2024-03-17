@@ -81,5 +81,5 @@ fragment NUMBER : [0-9];
 fragment WORD : '_' | LETTER | NUMBER;
 fragment Decimal : '0' |[1-9]NUMBER*;//正负号单独处理
 fragment Octal : '0' [0-7]+;
-fragment Hexadecimal : ('0x' | '0X') [0-9A-F]+;
+fragment Hexadecimal : ('0x' | '0X') [0-9a-fA-F]+;
 

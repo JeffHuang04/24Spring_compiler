@@ -27,7 +27,7 @@ public class Main
                 String type = sysYLexer.getRuleNames()[typeCode-1];
                 if (type.equals("INTEGER_CONST")&&text.length()>1){
                     if ((text.startsWith("0x")||text.startsWith("0X"))){
-                        text = String.valueOf(Integer.parseInt(text.substring(2),16));
+                        text = String.valueOf(Integer.parseInt(text.substring(2).toUpperCase(),16));
                     } else if (text.startsWith("0")) {
                         text = String.valueOf(Integer.parseInt(text.substring(1),8));
                     }
