@@ -32,7 +32,7 @@ public class Main
                         text = String.valueOf(Integer.parseInt(text.substring(1),8));
                     }
                 }
-                System.err.println(type + " " + text + " at Line " + line + ".");
+                System.err.println(type + " " + text + " at Line " + line + ".");//应该用err输出
             }
         }
 
