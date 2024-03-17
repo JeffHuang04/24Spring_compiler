@@ -8,7 +8,7 @@ public class myErrorListener extends BaseErrorListener {
 							int line, int charPositionInLine, String msg, RecognitionException e) {
 		isErr = true;
 		System.err.println("Error type A at Line "+ line +": "+ msg +'.');
-	}
+	}//此函数用法google得来
 	public boolean getError(){
 		return isErr;
 	}

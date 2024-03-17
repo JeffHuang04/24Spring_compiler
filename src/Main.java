@@ -2,7 +2,6 @@ import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -20,9 +19,17 @@ public class Main
         sysYLexer.addErrorListener(myListener);
         List<? extends Token> myTokens = sysYLexer.getAllTokens();
         if (!myListener.getError()) {
-            System.out.println(myTokens);
+//            System.out.println(myTokens);
+            for (Token t : myTokens){
+                int typeCode = t.getType();
+                String text = t.getText();
+                int line = t.getLine();
+                String type = sysYLexer.getRuleNames()[typeCode-1];
+                System.out.println(type + " " + text + " at Line " + line + ".");
+            }
         }
 
     }
+
 
 }
