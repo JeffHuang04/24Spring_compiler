@@ -32,7 +32,7 @@ public class Main
                         text = String.valueOf(Integer.parseInt(text.substring(1),8));
                     }
                 }
-                System.out.println(type + " " + text + " at Line " + line + ".");
+                System.err.println(type + " " + text + " at Line " + line + ".");
             }
         }
 
