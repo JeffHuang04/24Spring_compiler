@@ -2,6 +2,7 @@ import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.CommonTokenStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -15,25 +16,12 @@ public class Main
         CharStream input = CharStreams.fromFileName(source);
         SysYLexer sysYLexer = new SysYLexer(input);
         myErrorListener myListener = new myErrorListener();
-        sysYLexer.removeErrorListeners();
-        sysYLexer.addErrorListener(myListener);
-        List<? extends Token> myTokens = sysYLexer.getAllTokens();
+        CommonTokenStream tokens = new CommonTokenStream(sysYLexer);
+        SysYParser sysYParser = new SysYParser(tokens);
+        sysYParser.removeErrorListeners();
+        sysYParser.addErrorListener(myListener);
         if (!myListener.getError()) {
-//            System.out.println(myTokens);
-            for (Token t : myTokens){
-                int typeCode = t.getType();
-                String text = t.getText();
-                int line = t.getLine();
-                String type = sysYLexer.getRuleNames()[typeCode-1];
-                if (type.equals("INTEGER_CONST")&&text.length()>1){
-                    if ((text.startsWith("0x")||text.startsWith("0X"))){
-                        text = String.valueOf(Integer.parseInt(text.substring(2).toUpperCase(),16));
-                    } else if (text.startsWith("0")) {
-                        text = String.valueOf(Integer.parseInt(text.substring(1),8));
-                    }
-                }
-                System.err.println(type + " " + text + " at Line " + line + ".");//应该用err输出
-            }
+            System.out.println("hello");
         }
 
     }
