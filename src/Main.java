@@ -20,7 +20,7 @@ public class Main
         SysYParser sysYParser = new SysYParser(tokens);
         sysYParser.removeErrorListeners();
         sysYParser.addErrorListener(myListener);
-        //SysYParser.ProgramContext programContext = sysYParser.program();
+        SysYParser.ProgramContext programContext = sysYParser.program();
         if (!myListener.getError()) {
             System.out.println("hello");
         }
