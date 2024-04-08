@@ -158,7 +158,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		}
 		return null;
 	}
-
 	@Override
 	public Void visitDecl(SysYParser.DeclContext ctx) {
 		System.out.print("\u001B[95m"); //Bright Magenta
