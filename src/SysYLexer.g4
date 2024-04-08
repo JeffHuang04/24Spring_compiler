@@ -70,7 +70,7 @@ IDENT : ('_' | LETTER) WORD* ;
 // 数字常量，包含十进制数，0开头的八进制数，0x或0X开头的十六进制数
 INTEGER_CONST :   Decimal | Octal | Hexadecimal;
 
-WS : [ \r\n\t]+ -> skip;
+WS : [ \r\n\t\u000C]+ -> skip;
 
 LINE_COMMENT : '//' .*? '\n' -> skip;//问号的作用是匹配最短的可能性->非贪婪匹配
 
