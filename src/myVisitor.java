@@ -4,13 +4,20 @@ import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.Objects;
+import java.util.Stack;
 
 public class myVisitor extends SysYParserBaseVisitor<Void>{
 	@Override
 	public Void visitChildren(RuleNode node) {
 		return super.visitChildren(node);
 	}
-
+	Stack<String> stackAllBracket = new Stack<>();
+	int colorIndex = 0;
+	private static final String[] COLORS =
+			{"\u001B[91m", "\u001B[92m", "\u001B[93m",
+			"\u001B[94m", "\u001B[95m", "\u001B[96m"};
+	//BrightRed,BrightGreen,BrightYellow,
+	//BrightBlue,BrightMagenta,BrightCyan
 	@Override
 	public Void visitTerminal(TerminalNode node) {
 		String text = node.getText();
@@ -92,7 +99,45 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 					System.out.print(text);
 				}
 				break;
-
+			case SysYParser.L_BRACE:
+			case SysYParser.L_PAREN:
+			case SysYParser.L_BRACKT:
+			case SysYParser.R_BRACE:
+			case SysYParser.R_PAREN:
+			case SysYParser.R_BRACKT:
+				if (Objects.equals(text, "{")
+				|| Objects.equals(text, "(")
+				|| Objects.equals(text,"[")){
+					stackAllBracket.push(text);
+					System.out.print(COLORS[colorIndex]);
+					System.out.print(text);
+					if (NodeInDecl(node)) {
+						System.out.print("\u001B[95m"); //Bright Magenta
+					} else if (NodeInStmtNotBlock(node)) {
+						System.out.print("\u001B[97m"); //White
+					} else {
+						System.out.print("\u001B[39m");
+					}
+					colorIndex = (colorIndex + 1) % COLORS.length;
+				}else {
+					if ((Objects.equals(text, "}") && stackAllBracket.peek().equals("{"))
+							|| (Objects.equals(text, ")") && stackAllBracket.peek().equals("("))
+							|| (Objects.equals(text, "]") && stackAllBracket.peek().equals("["))
+					){
+						stackAllBracket.pop();
+						System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
+						System.out.print(text);
+						if (NodeInDecl(node)) {
+							System.out.print("\u001B[95m"); //Bright Magenta
+						} else if (NodeInStmtNotBlock(node)) {
+							System.out.print("\u001B[97m"); //White
+						} else {
+							System.out.print("\u001B[39m");
+						}
+						colorIndex = ((colorIndex - 1)+COLORS.length) % COLORS.length;
+					}
+				}
+				break;
 			case SysYParser.WS://Lexer中不包括/0
 				break;
 			default:
