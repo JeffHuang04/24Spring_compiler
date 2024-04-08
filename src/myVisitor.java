@@ -3,6 +3,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.Objects;
+
 public class myVisitor extends SysYParserBaseVisitor<Void>{
 	@Override
 	public Void visitChildren(RuleNode node) {
@@ -12,6 +14,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	@Override
 	public Void visitTerminal(TerminalNode node) {
 		String text = node.getText();
+		if (Objects.equals(text, "<EOF>")){
+			return null;
+		}
 		switch (node.getSymbol().getType()){
 			case SysYParser.CONST:
 			case SysYParser.INT:
@@ -76,7 +81,13 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 					|| parent instanceof SysYParser.ExpContext){//保证是函数名
 					System.out.print("\u001B[93m"); //Bright Yellow
 					System.out.print(text);
-					System.out.print("\u001B[39m");
+					if (NodeInDecl(node)) {
+						System.out.print("\u001B[95m"); //Bright Magenta
+					} else if (NodeInStmtNotBlock(node)) {
+						System.out.print("\u001B[97m"); //White
+					} else {
+						System.out.print("\u001B[39m");
+					}
 				}else {
 					System.out.print(text);
 				}
