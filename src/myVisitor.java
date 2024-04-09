@@ -2,6 +2,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
@@ -42,10 +43,26 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			case SysYParser.BREAK:
 			case SysYParser.CONTINUE:
 			case SysYParser.RETURN:
+				if (flag == SysYParser.ELSE){
+					for (int i = 0; i < retractionNum; i++){
+						PrintRetraction();
+					}
+				}//else因为重新换行所以要重新进行缩进
 				System.out.print("\u001B[96m");//Bright Cyan
 				System.out.print(text);
 				ClearColor(node);
-				//PrintSpace();
+				if (flag == SysYParser.CONST || flag == SysYParser.INT
+				|| flag == SysYParser.VOID || flag == SysYParser.IF
+				|| flag == SysYParser.ELSE || flag == SysYParser.WHILE
+				){
+					PrintSpace();
+				}
+				if (flag == SysYParser.RETURN){
+					if (node.getParent() instanceof SysYParser.StmtContext
+					&& ((SysYParser.StmtContext) node.getParent()).exp() != null){
+						PrintSpace();
+					}
+				}
 				break;
 			case SysYParser.PLUS:
 			case SysYParser.MINUS:
@@ -64,9 +81,29 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			case SysYParser.OR:
 			case SysYParser.COMMA:
 			case SysYParser.SEMICOLON:
+				boolean IsTwoOp = flag == SysYParser.PLUS || flag == SysYParser.MINUS
+						|| flag == SysYParser.MUL || flag == SysYParser.DIV
+						|| flag == SysYParser.MOD || flag == SysYParser.ASSIGN
+						|| flag == SysYParser.EQ || flag == SysYParser.NEQ
+						|| flag == SysYParser.LE || flag == SysYParser.GE
+						|| flag == SysYParser.LT || flag == SysYParser.GT
+						|| flag == SysYParser.AND || flag == SysYParser.OR;
+				if (IsTwoOp){
+					if (!(node.getParent() instanceof SysYParser.UnaryOpContext)){
+						PrintSpace();
+					}
+				}
 				System.out.print("\u001B[91m"); //Bright Red
 				System.out.print(text);
 				ClearColor(node);
+				if (IsTwoOp){
+					if (!(node.getParent() instanceof SysYParser.UnaryOpContext)){
+						PrintSpace();
+					}
+				}
+				if(flag == SysYParser.COMMA){
+					PrintSpace();
+				}
 				break;
 			case SysYParser.INTEGER_CONST:
 				System.out.print("\u001B[35m"); //Magenta
@@ -93,7 +130,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				if (Objects.equals(text, "{")
 				|| Objects.equals(text, "(")
 				|| Objects.equals(text,"[")){
-					//System.out.print(COLORS[colorIndex]);//未解之谜，为什么去掉这一行不可以呢
+					//System.out.print(COLORS[colorIndex]);
 					if (Objects.equals(text, "(")
 					|| Objects.equals(text,"[")) {
 						System.out.print(COLORS[colorIndex]);
@@ -117,11 +154,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 							System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 							System.out.print(text);
 						}else {
-
-							for (int i = 0; i < retractionNum-1; i++){
-								PrintRetraction();
-							}
-							//System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);////未解之谜，为什么去掉这一行不可以呢
+							//System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 							RBrace(node);
 							//System.out.print(text);
 						}
@@ -241,6 +274,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	}
 
 	private void LBrace(TerminalNode node){
+
 		String text = node.getText();
 		if (node.getParent() instanceof SysYParser.BlockContext){
 			if ((node.getParent().getParent() != null
@@ -254,9 +288,12 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				System.out.print(text);//函数声明中、stmt中if、else、while代码块中的作花括号
 				//System.out.println();
 				PrintLineBreak();
-			}else {
+			}else {//单独代码块中的左花括号
+				for (int i = 0; i<retractionNum-1;i++){
+					PrintRetraction();
+				}
 				System.out.print(COLORS[colorIndex]);
-				System.out.print(text);//单独代码块中的左花括号
+				System.out.print(text);
 				//System.out.println();
 				PrintLineBreak();
 			}
@@ -267,10 +304,15 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	}
 
 	private void RBrace(TerminalNode node){
+		if (node.getParent() instanceof SysYParser.BlockContext) {//代码块的右花括号要缩进
+			for (int i = 0; i < retractionNum - 1; i++) {
+				PrintRetraction();
+			}
+		}
 		String text = node.getText();
 		if (node.getParent() instanceof SysYParser.BlockContext
 		&& node.getParent().getParent() != null
-		&& node.getParent().getParent() instanceof SysYParser.FuncDefContext){
+		&& node.getParent().getParent() instanceof SysYParser.FuncDefContext){//判断是否是函数定义中的括号
 			System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 			System.out.print(text);
 			//System.out.println();
