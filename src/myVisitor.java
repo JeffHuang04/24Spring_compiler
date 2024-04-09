@@ -109,7 +109,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 							|| (Objects.equals(text, "]") && stackAllBracket.peek().equals("["))
 					){
 						stackAllBracket.pop();
-						System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
+						//System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 						if (Objects.equals(text, ")")
 						|| Objects.equals(text, "]")) {
 							System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
