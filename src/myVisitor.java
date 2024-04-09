@@ -2,6 +2,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
 
@@ -10,6 +11,11 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	public Void visitChildren(RuleNode node) {
 		return super.visitChildren(node);
 	}
+
+	String colorTemp = "\u001B[39m";
+
+	String underLineTemp = "";
+
 	Stack<String> stackAllBracket = new Stack<>();
 	int colorIndex = 0;
 	private static final String[] COLORS =
@@ -89,7 +95,8 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 					|| Objects.equals(text,"[")) {
 						System.out.print(text);
 					}else {
-						System.out.print(text);
+						LBrace(node);
+						//System.out.print(text);
 					}
 					ClearColor(node);
 					stackAllBracket.push(text);
@@ -101,7 +108,13 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 					){
 						stackAllBracket.pop();
 						System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
-						System.out.print(text);
+						if (Objects.equals(text, ")")
+						|| Objects.equals(text, "]")) {
+							System.out.print(text);
+						}else {
+							RBrace(node);
+							//System.out.print(text);
+						}
 						ClearColor(node);
 						colorIndex = ((colorIndex - 1)+COLORS.length) % COLORS.length;
 					}
@@ -120,8 +133,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	public Void visitStmt(SysYParser.StmtContext ctx) {
 		if (!(ctx.getChild(0) instanceof SysYParser.BlockContext)){
 			System.out.print("\u001B[97m"); //White
+			colorTemp = "\u001B[97m";
 			visitChildren(ctx);
 			System.out.print("\u001B[39m");
+			colorTemp = "\u001B[39m";
 		} else {
 			visitChildren(ctx);
 		}
@@ -133,10 +148,24 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	@Override
 	public Void visitDecl(SysYParser.DeclContext ctx) {
 		System.out.print("\u001B[95m"); //Bright Magenta
+		colorTemp = "\u001B[95m";
 		System.out.print("\u001B[4m"); //Underlined
+		underLineTemp = "\u001B[4m";
 		visitChildren(ctx);
 		System.out.println();//decl换行
 		System.out.print("\u001B[0m");
+		colorTemp = "\u001B[39m";
+		underLineTemp = "";
+		return null;
+	}
+
+	@Override
+	public Void visitFuncDef(SysYParser.FuncDefContext ctx) {
+		int lineNumber = ctx.getStart().getLine();
+		if (lineNumber != 1){
+			System.out.println();
+		}
+		visitChildren(ctx);
 		return null;
 	}
 
@@ -182,7 +211,45 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		return false;
 	}
 
-	private void LBraceLineBreak(TerminalNode node){
+	private void LBrace(TerminalNode node){
+		String text = node.getText();
+		if (node.getParent() instanceof SysYParser.BlockContext){
+			if ((node.getParent().getParent() != null
+			&& node.getParent().getParent() instanceof SysYParser.FuncDefContext)
+			|| (node.getParent().getParent().getParent() != null
+			&& node.getParent().getParent() instanceof SysYParser.StmtContext
+			&& node.getParent().getParent().getParent() instanceof SysYParser.StmtContext)){
+				//System.out.print(' ');
+				PrintSpace();
+				System.out.print(text);//函数声明中、stmt中if、else、while代码块中的作花括号
+				System.out.println();
+			}else {
+				System.out.print(text);//单独代码块中的左花括号
+				System.out.println();
+			}
+		}else {//声明语句的左花括号
+			System.out.print(text);
+		}
+	}
 
+	private void RBrace(TerminalNode node){
+		String text = node.getText();
+		if (node.getParent() instanceof SysYParser.BlockContext
+		&& node.getParent().getParent() != null
+		&& node.getParent().getParent() instanceof SysYParser.FuncDefContext){
+			System.out.print(text);
+			System.out.println();
+		}else {
+			System.out.print(text);
+		}
+	}
+
+	private void PrintSpace(){
+		System.out.println("\u001B[0m");//reset
+		System.out.print(' ');
+		System.out.print(colorTemp);
+		if (!Objects.equals(underLineTemp, "")){
+			System.out.print(underLineTemp);
+		}
 	}
 }
