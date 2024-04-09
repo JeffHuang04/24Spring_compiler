@@ -175,7 +175,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	@Override
 	public Void visitStmt(SysYParser.StmtContext ctx) {
 		for (int i = 0; i < retractionNum; i++){
-			if (!(ctx.getChild(0) instanceof SysYParser.BlockContext)) {
+			if (!(ctx.getChild(0) instanceof SysYParser.BlockContext)//如果该语句是block那么不需要缩进
+			&& !(ctx.getParent() instanceof SysYParser.StmtContext//简单处理else if
+			&& ctx.getParent().getChild(0) instanceof TerminalNode)) {
 				PrintRetraction();
 			}
 		}
@@ -340,7 +342,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			System.out.print(underLineTemp);
 		}
 	}
-
 	private void PrintRetraction() {
 		System.out.print("\u001B[0m");//reset
 		System.out.print("    ");
