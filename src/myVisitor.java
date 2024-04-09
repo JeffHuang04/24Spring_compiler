@@ -271,12 +271,12 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		if (node.getParent() instanceof SysYParser.BlockContext
 		&& node.getParent().getParent() != null
 		&& node.getParent().getParent() instanceof SysYParser.FuncDefContext){
-			System.out.print(COLORS[colorIndex]);
+			System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 			System.out.print(text);
 			//System.out.println();
 			PrintLineBreak();
 		}else {
-			System.out.print(COLORS[colorIndex]);
+			System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 			System.out.print(text);
 		}
 	}
