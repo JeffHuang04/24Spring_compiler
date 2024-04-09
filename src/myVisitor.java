@@ -1,4 +1,3 @@
-import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -161,7 +160,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		return false;
 	}
 
-	private Void ClearColor(TerminalNode node){
+	private void ClearColor(TerminalNode node){
 		if (NodeInDecl(node)) {
 			System.out.print("\u001B[95m");//Bright Magenta
 		} else if (NodeInStmtNotBlock(node)) {
@@ -169,6 +168,5 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		} else {
 			System.out.print("\u001B[39m");
 		}
-		return null;
 	}
 }
