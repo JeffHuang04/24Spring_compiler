@@ -27,4 +27,5 @@ int func() {
             c = 1;
     }
     return -3;
+    return;
 }

@@ -21,10 +21,11 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	@Override
 	public Void visitTerminal(TerminalNode node) {
 		String text = node.getText();
+		int flag = node.getSymbol().getType();
 		if (Objects.equals(text, "<EOF>")){
 			return null;
 		}
-		switch (node.getSymbol().getType()){
+		switch (flag){
 			case SysYParser.CONST:
 			case SysYParser.INT:
 			case SysYParser.VOID:
@@ -63,24 +64,12 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			case SysYParser.SEMICOLON:
 				System.out.print("\u001B[91m"); //Bright Red
 				System.out.print(text);
-				if (NodeInDecl(node)) {
-					System.out.print("\u001B[95m");//Bright Magenta
-				} else if (NodeInStmtNotBlock(node)) {
-					System.out.print("\u001B[97m"); //White
-				} else {
-					System.out.print("\u001B[39m");
-				}
+				ClearColor(node);
 				break;
 			case SysYParser.INTEGER_CONST:
 				System.out.print("\u001B[35m"); //Magenta
 				System.out.print(text);
-				if (NodeInDecl(node)) {
-					System.out.print("\u001B[95m");//Bright Magenta
-				} else if (NodeInStmtNotBlock(node)) {
-					System.out.print("\u001B[97m"); //White
-				} else {
-					System.out.print("\u001B[39m");
-				}
+				ClearColor(node);
 				break;
 			case SysYParser.IDENT:
 				ParseTree parent = node.getParent();
@@ -88,13 +77,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 					|| parent instanceof SysYParser.ExpContext){//保证是函数名
 					System.out.print("\u001B[93m"); //Bright Yellow
 					System.out.print(text);
-					if (NodeInDecl(node)) {
-						System.out.print("\u001B[95m"); //Bright Magenta
-					} else if (NodeInStmtNotBlock(node)) {
-						System.out.print("\u001B[97m"); //White
-					} else {
-						System.out.print("\u001B[39m");
-					}
+					ClearColor(node);
 				}else {
 					System.out.print(text);
 				}
@@ -111,13 +94,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 					stackAllBracket.push(text);
 					System.out.print(COLORS[colorIndex]);
 					System.out.print(text);
-					if (NodeInDecl(node)) {
-						System.out.print("\u001B[95m"); //Bright Magenta
-					} else if (NodeInStmtNotBlock(node)) {
-						System.out.print("\u001B[97m"); //White
-					} else {
-						System.out.print("\u001B[39m");
-					}
+					ClearColor(node);
 					colorIndex = (colorIndex + 1) % COLORS.length;
 				}else {
 					if ((Objects.equals(text, "}") && stackAllBracket.peek().equals("{"))
@@ -127,13 +104,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 						stackAllBracket.pop();
 						System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 						System.out.print(text);
-						if (NodeInDecl(node)) {
-							System.out.print("\u001B[95m"); //Bright Magenta
-						} else if (NodeInStmtNotBlock(node)) {
-							System.out.print("\u001B[97m"); //White
-						} else {
-							System.out.print("\u001B[39m");
-						}
+						ClearColor(node);
 						colorIndex = ((colorIndex - 1)+COLORS.length) % COLORS.length;
 					}
 				}
@@ -188,5 +159,16 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			parent = parent.getParent();
 		}
 		return false;
+	}
+
+	private Void ClearColor(TerminalNode node){
+		if (NodeInDecl(node)) {
+			System.out.print("\u001B[95m");//Bright Magenta
+		} else if (NodeInStmtNotBlock(node)) {
+			System.out.print("\u001B[97m"); //White
+		} else {
+			System.out.print("\u001B[39m");
+		}
+		return null;
 	}
 }
