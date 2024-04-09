@@ -120,6 +120,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		} else {
 			visitChildren(ctx);
 		}
+		if (!JudgeChildrenIsStmt(ctx)){
+			System.out.println();
+		}
 		return null;
 	}
 	@Override
@@ -163,5 +166,14 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		} else {
 			System.out.print("\u001B[39m");
 		}
+	}
+
+	private Boolean JudgeChildrenIsStmt(SysYParser.StmtContext ctx){
+		for (ParseTree child: ctx.children){
+			if (child instanceof SysYParser.StmtContext){
+				return true;
+			}
+		}
+		return false;
 	}
 }
