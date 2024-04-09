@@ -93,7 +93,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				if (Objects.equals(text, "{")
 				|| Objects.equals(text, "(")
 				|| Objects.equals(text,"[")){
-					System.out.print(COLORS[colorIndex]);//未解之谜，为什么去掉这一行不可以呢
+					//System.out.print(COLORS[colorIndex]);//未解之谜，为什么去掉这一行不可以呢
 					if (Objects.equals(text, "(")
 					|| Objects.equals(text,"[")) {
 						System.out.print(COLORS[colorIndex]);
@@ -117,10 +117,11 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 							System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 							System.out.print(text);
 						}else {
+
 							for (int i = 0; i < retractionNum-1; i++){
 								PrintRetraction();
 							}
-							System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);////未解之谜，为什么去掉这一行不可以呢
+							//System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);////未解之谜，为什么去掉这一行不可以呢
 							RBrace(node);
 							//System.out.print(text);
 						}
@@ -254,11 +255,13 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				//System.out.println();
 				PrintLineBreak();
 			}else {
+				System.out.print(COLORS[colorIndex]);
 				System.out.print(text);//单独代码块中的左花括号
 				//System.out.println();
 				PrintLineBreak();
 			}
 		}else {//声明语句的左花括号
+			System.out.print(COLORS[colorIndex]);
 			System.out.print(text);
 		}
 	}
@@ -268,10 +271,12 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		if (node.getParent() instanceof SysYParser.BlockContext
 		&& node.getParent().getParent() != null
 		&& node.getParent().getParent() instanceof SysYParser.FuncDefContext){
+			System.out.print(COLORS[colorIndex]);
 			System.out.print(text);
 			//System.out.println();
 			PrintLineBreak();
 		}else {
+			System.out.print(COLORS[colorIndex]);
 			System.out.print(text);
 		}
 	}
