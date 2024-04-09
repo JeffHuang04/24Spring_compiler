@@ -113,7 +113,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 
 	@Override
 	public Void visitStmt(SysYParser.StmtContext ctx) {
-		if (ctx.getChild(0) instanceof SysYParser.BlockContext){
+		if (ctx.block() == null){
 			System.out.print("\u001B[97m"); //White
 			visitChildren(ctx);
 			System.out.print("\u001B[39m");
