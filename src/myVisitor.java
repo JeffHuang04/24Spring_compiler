@@ -91,7 +91,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				if (Objects.equals(text, "{")
 				|| Objects.equals(text, "(")
 				|| Objects.equals(text,"[")){
-					System.out.print(COLORS[colorIndex]);
+					System.out.print(COLORS[colorIndex]);//未解之谜，为什么去掉这一行不可以呢
 					if (Objects.equals(text, "(")
 					|| Objects.equals(text,"[")) {
 						System.out.print(COLORS[colorIndex]);
@@ -109,7 +109,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 							|| (Objects.equals(text, "]") && stackAllBracket.peek().equals("["))
 					){
 						stackAllBracket.pop();
-						System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
+						System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);////未解之谜，为什么去掉这一行不可以呢
 						if (Objects.equals(text, ")")
 						|| Objects.equals(text, "]")) {
 							System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
@@ -144,7 +144,8 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			visitChildren(ctx);
 		}
 		if (!JudgeChildrenIsStmt(ctx)){ //判断子节点是否是Stmt
-			System.out.println();
+			//System.out.println();
+			PrintLineBreak();
 		}
 		return null;
 	}
@@ -155,7 +156,8 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		System.out.print("\u001B[4m"); //Underlined
 		underLineTemp = "\u001B[4m";
 		visitChildren(ctx);
-		System.out.println();//decl换行
+		//System.out.println();//decl换行
+		PrintLineBreak();
 		System.out.print("\u001B[0m");
 		colorTemp = "\u001B[39m";
 		underLineTemp = "";
@@ -166,7 +168,8 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	public Void visitFuncDef(SysYParser.FuncDefContext ctx) {
 		int lineNumber = ctx.getStart().getLine();
 		if (lineNumber != 1){
-			System.out.println();
+			//System.out.println();
+			PrintLineBreak();
 		}
 		visitChildren(ctx);
 		return null;
@@ -226,10 +229,12 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				PrintSpace();
 				System.out.print(COLORS[colorIndex]);
 				System.out.print(text);//函数声明中、stmt中if、else、while代码块中的作花括号
-				System.out.println();
+				//System.out.println();
+				PrintLineBreak();
 			}else {
 				System.out.print(text);//单独代码块中的左花括号
-				System.out.println();
+				//System.out.println();
+				PrintLineBreak();
 			}
 		}else {//声明语句的左花括号
 			System.out.print(text);
@@ -243,15 +248,34 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		&& node.getParent().getParent() instanceof SysYParser.FuncDefContext){
 			System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 			System.out.print(text);
-			System.out.println();
+			//System.out.println();
+			PrintLineBreak();
 		}else {
 			System.out.print(text);
 		}
 	}
 
-	private void PrintSpace(){
+	private void PrintLineBreak() {
 		System.out.print("\u001B[0m");//reset
-		System.out.print(' ');
+		System.out.println();
+		System.out.print(colorTemp);
+		if (!Objects.equals(underLineTemp, "")){
+			System.out.print(underLineTemp);
+		}
+	}
+
+	private void PrintSpace() {
+		System.out.print("\u001B[0m");//reset
+		System.out.print(" ");
+		System.out.print(colorTemp);
+		if (!Objects.equals(underLineTemp, "")){
+			System.out.print(underLineTemp);
+		}
+	}
+
+	private void PrintRetraction() {
+		System.out.print("\u001B[0m");//reset
+		System.out.print("    ");
 		System.out.print(colorTemp);
 		if (!Objects.equals(underLineTemp, "")){
 			System.out.print(underLineTemp);
