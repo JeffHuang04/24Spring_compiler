@@ -90,9 +90,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				if (Objects.equals(text, "{")
 				|| Objects.equals(text, "(")
 				|| Objects.equals(text,"[")){
-					System.out.print(COLORS[colorIndex]);
 					if (Objects.equals(text, "(")
 					|| Objects.equals(text,"[")) {
+						System.out.print(COLORS[colorIndex]);
 						System.out.print(text);
 					}else {
 						LBrace(node);
@@ -221,6 +221,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			&& node.getParent().getParent().getParent() instanceof SysYParser.StmtContext)){
 				//System.out.print(' ');
 				PrintSpace();
+				System.out.print(COLORS[colorIndex]);
 				System.out.print(text);//函数声明中、stmt中if、else、while代码块中的作花括号
 				System.out.println();
 			}else {
@@ -245,7 +246,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	}
 
 	private void PrintSpace(){
-		System.out.println("\u001B[0m");//reset
+		System.out.print("\u001B[0m");//reset
 		System.out.print(' ');
 		System.out.print(colorTemp);
 		if (!Objects.equals(underLineTemp, "")){
