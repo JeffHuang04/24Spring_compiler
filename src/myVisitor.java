@@ -36,13 +36,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			case SysYParser.RETURN:
 				System.out.print("\u001B[96m");//Bright Cyan
 				System.out.print(text);
-				if (NodeInDecl(node)) {
-					System.out.print("\u001B[95m");//Bright Magenta
-				} else if (NodeInStmtNotBlock(node)) {
-					System.out.print("\u001B[97m"); //White
-				} else {
-					System.out.print("\u001B[39m");
-				}
+				ClearColor(node);
 				break;
 			case SysYParser.PLUS:
 			case SysYParser.MINUS:
@@ -119,7 +113,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 
 	@Override
 	public Void visitStmt(SysYParser.StmtContext ctx) {
-		if (ctx.block() == null){
+		if (ctx.getChild(0) instanceof SysYParser.BlockContext){
 			System.out.print("\u001B[97m"); //White
 			visitChildren(ctx);
 			System.out.print("\u001B[39m");
@@ -133,6 +127,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		System.out.print("\u001B[95m"); //Bright Magenta
 		System.out.print("\u001B[4m"); //Underlined
 		visitChildren(ctx);
+		System.out.println();//decl换行
 		System.out.print("\u001B[0m");
 		return null;
 	}

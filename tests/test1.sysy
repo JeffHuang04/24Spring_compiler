@@ -12,12 +12,6 @@ int func() {
         if (cond) {
             c = a + b;
             {
-            {
-            {{{
-            }
-            }
-            }
-            }
             }
         }
         else if (cond2) {
@@ -27,5 +21,4 @@ int func() {
             c = 1;
     }
     return -3;
-    return;
 }
