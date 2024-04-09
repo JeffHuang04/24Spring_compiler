@@ -84,10 +84,15 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				if (Objects.equals(text, "{")
 				|| Objects.equals(text, "(")
 				|| Objects.equals(text,"[")){
-					stackAllBracket.push(text);
 					System.out.print(COLORS[colorIndex]);
-					System.out.print(text);
+					if (Objects.equals(text, "(")
+					|| Objects.equals(text,"[")) {
+						System.out.print(text);
+					}else {
+						System.out.print(text);
+					}
 					ClearColor(node);
+					stackAllBracket.push(text);
 					colorIndex = (colorIndex + 1) % COLORS.length;
 				}else {
 					if ((Objects.equals(text, "}") && stackAllBracket.peek().equals("{"))
@@ -120,7 +125,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		} else {
 			visitChildren(ctx);
 		}
-		if (!JudgeChildrenIsStmt(ctx)){
+		if (!JudgeChildrenIsStmt(ctx)){ //判断子节点是否是Stmt
 			System.out.println();
 		}
 		return null;
@@ -175,5 +180,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			}
 		}
 		return false;
+	}
+
+	private void LBraceLineBreak(TerminalNode node){
+
 	}
 }
