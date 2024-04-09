@@ -90,6 +90,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				if (Objects.equals(text, "{")
 				|| Objects.equals(text, "(")
 				|| Objects.equals(text,"[")){
+					System.out.print(COLORS[colorIndex]);
 					if (Objects.equals(text, "(")
 					|| Objects.equals(text,"[")) {
 						System.out.print(COLORS[colorIndex]);
