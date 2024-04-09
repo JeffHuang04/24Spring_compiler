@@ -1,4 +1,6 @@
 int Fibonacci (int n)
 {
-    int a = 1;
+    if(a == 1){
+        a = 5;
+    }
 }

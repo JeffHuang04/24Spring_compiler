@@ -14,6 +14,8 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 
 	String colorTemp = "\u001B[39m";
 
+	int retractionNum = 0;
+
 	String underLineTemp = "";
 
 	Stack<String> stackAllBracket = new Stack<>();
@@ -109,12 +111,16 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 							|| (Objects.equals(text, "]") && stackAllBracket.peek().equals("["))
 					){
 						stackAllBracket.pop();
-						System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);////未解之谜，为什么去掉这一行不可以呢
+						//System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);////未解之谜，为什么去掉这一行不可以呢
 						if (Objects.equals(text, ")")
 						|| Objects.equals(text, "]")) {
 							System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 							System.out.print(text);
 						}else {
+							for (int i = 0; i < retractionNum-1; i++){
+								PrintRetraction();
+							}
+							System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);////未解之谜，为什么去掉这一行不可以呢
 							RBrace(node);
 							//System.out.print(text);
 						}
@@ -134,6 +140,11 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 
 	@Override
 	public Void visitStmt(SysYParser.StmtContext ctx) {
+		for (int i = 0; i < retractionNum; i++){
+			if (!(ctx.getChild(0) instanceof SysYParser.BlockContext)) {
+				PrintRetraction();
+			}
+		}
 		if (!(ctx.getChild(0) instanceof SysYParser.BlockContext)){
 			System.out.print("\u001B[97m"); //White
 			colorTemp = "\u001B[97m";
@@ -151,6 +162,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	}
 	@Override
 	public Void visitDecl(SysYParser.DeclContext ctx) {
+		for (int i = 0; i < retractionNum; i++){
+			PrintRetraction();
+		}
 		System.out.print("\u001B[95m"); //Bright Magenta
 		colorTemp = "\u001B[95m";
 		System.out.print("\u001B[4m"); //Underlined
@@ -172,6 +186,14 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			PrintLineBreak();
 		}
 		visitChildren(ctx);
+		return null;
+	}
+
+	@Override
+	public Void visitBlock(SysYParser.BlockContext ctx) {
+		retractionNum++;
+		visitChildren(ctx);
+		retractionNum--;
 		return null;
 	}
 
@@ -246,7 +268,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		if (node.getParent() instanceof SysYParser.BlockContext
 		&& node.getParent().getParent() != null
 		&& node.getParent().getParent() instanceof SysYParser.FuncDefContext){
-			System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 			System.out.print(text);
 			//System.out.println();
 			PrintLineBreak();
