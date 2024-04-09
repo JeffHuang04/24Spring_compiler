@@ -221,7 +221,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			&& node.getParent().getParent() instanceof SysYParser.StmtContext
 			&& node.getParent().getParent().getParent() instanceof SysYParser.StmtContext)){
 				//System.out.print(' ');
-				//PrintSpace();
+				PrintSpace();
 				System.out.print(COLORS[colorIndex]);
 				System.out.print(text);//函数声明中、stmt中if、else、while代码块中的作花括号
 				System.out.println();
