@@ -43,7 +43,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				System.out.print("\u001B[96m");//Bright Cyan
 				System.out.print(text);
 				ClearColor(node);
-				PrintSpace();
+				//PrintSpace();
 				break;
 			case SysYParser.PLUS:
 			case SysYParser.MINUS:
