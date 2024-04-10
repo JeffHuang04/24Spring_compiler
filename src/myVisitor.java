@@ -66,6 +66,21 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 						PrintSpace();
 					}
 				}//处理else后空格
+//				if (flag == SysYParser.ELSE){
+//					if (node.getParent() instanceof SysYParser.StmtContext
+//					&& JudgeBehindElseSingle((SysYParser.StmtContext) node.getParent())){//如果else语句是后面Single
+//						retractionNum++;
+//					}
+//				}//处理else+else单独single 后缩进、换行问题
+				if (flag == SysYParser.ELSE){
+					ParseTree behindElseStmt = node.getParent().getChild(6);
+					if (node.getParent() instanceof SysYParser.StmtContext
+					&& JudgeBehindElseSingle((SysYParser.StmtContext) node.getParent())
+					&& !(behindElseStmt.getChild(0).getText().equals("if"))) {//如果else语句是后面Single并且是非if
+						retractionNum++;
+						PrintLineBreak();
+					}
+				}//处理else+else单独single 后换行问题
 				if (flag == SysYParser.RETURN){
 					if (node.getParent() instanceof SysYParser.StmtContext
 					&& ((SysYParser.StmtContext) node.getParent()).exp() != null){
@@ -201,9 +216,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		}
 		if (JudgeBehindIfSingle(ctx)){
 			retractionNum++;
-		}else if (JudgeBehindElseSingle(ctx)){
-			retractionNum++;
 		}
+//		else if (JudgeBehindElseSingle(ctx)){
+//			retractionNum++;
+//		}//会对大stmt的else换行造成错误
 		if (!(ctx.getChild(0) instanceof SysYParser.BlockContext)){
 			System.out.print("\u001B[97m"); //White
 			colorTemp = "\u001B[97m";
@@ -213,18 +229,24 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		} else {
 			visitChildren(ctx);
 		}
-		if (JudgeIsIfBackSingle(ctx)
-		&& ctx.getParent() instanceof SysYParser.StmtContext
-		&& ((SysYParser.StmtContext) ctx.getParent()).ELSE() == null){
-			retractionNum--;//只有if没有else的缩进减1 不会影响else
+//		if (JudgeIsIfBackSingle(ctx)
+//		&& ctx.getParent() instanceof SysYParser.StmtContext
+//		&& ((SysYParser.StmtContext) ctx.getParent()).ELSE() == null){
+//			retractionNum--;//只有if没有else的缩进减1 不会影响else//好像和else没有关系呢
+//		}//有问题，只有在整个stmt结束之前才会减去缩进//想错了，没事的
+		if (JudgeIsIfBackSingle(ctx)){
+			retractionNum--;//只要是if+if后single就要减去
+		}
+		if (JudgeIsElseBackSingle(ctx)){
+			retractionNum--;
 		}
 //		if (JudgeIsIfBackSingle(ctx)){
 //			retractionNum--;
 //			if (ctx.getParent() instanceof SysYParser.StmtContext
 //			&&JudgeBehindElseSingle((SysYParser.StmtContext) ctx.getParent())){
 //				retractionNum++;
-//			}
-//		}//有问题，会影响else的输出，应该迁移到else后面判断
+//			}//有问题，会影响else的输出，应该迁移到else后面判断
+//		}
 //		if (JudgeIsElseBackSingle(ctx)){
 //			retractionNum--;
 //		}
