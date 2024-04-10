@@ -26,6 +26,8 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			"\u001B[94m", "\u001B[95m", "\u001B[96m"};
 	//BrightRed,BrightGreen,BrightYellow,
 	//BrightBlue,BrightMagenta,BrightCyan
+
+	boolean IsOutput = false;
 	@Override
 	public Void visitTerminal(TerminalNode node) {
 		String text = node.getText();
@@ -218,17 +220,20 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		System.out.print("\u001B[0m");
 		colorTemp = "\u001B[39m";
 		underLineTemp = "";
+		IsOutput = true;
 		return null;
 	}
 
 	@Override
 	public Void visitFuncDef(SysYParser.FuncDefContext ctx) {
-		int lineNumber = ctx.getStart().getLine();
-		if (lineNumber != 1){
+		//int lineNumber = ctx.getStart().getLine();
+//		if (lineNumber != 1){
+		if (IsOutput){
 			//System.out.println();
 			PrintLineBreak();
 		}
 		visitChildren(ctx);
+		IsOutput = true;
 		return null;
 	}
 
@@ -355,5 +360,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		if (!Objects.equals(underLineTemp, "")){
 			System.out.print(underLineTemp);
 		}
+	}
+
+	private boolean JudgeElseIf(SysYParser.StmtContext ctx){
+		return true;
 	}
 }
