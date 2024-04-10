@@ -211,7 +211,8 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			if (!(ctx.getChild(0) instanceof SysYParser.BlockContext)//如果该语句是block那么不需要缩进
 			&& !(ctx.getParent() instanceof SysYParser.StmtContext//简单处理else if，让else 后的if不缩进 此处有问题
 			&& ((SysYParser.StmtContext) ctx.getParent()).ELSE() != null
-			&& ctx.getChild(0).getText().equals("if"))){
+			&& ctx.getChild(0).getText().equals("if")
+			&& ctx.getParent().getChild(6).equals(ctx))){
 //			&& ctx.getParent().getChild(0) instanceof TerminalNode)) {
 				PrintRetraction();
 			}
