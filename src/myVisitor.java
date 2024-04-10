@@ -207,13 +207,12 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 
 	@Override
 	public Void visitStmt(SysYParser.StmtContext ctx) {
-		for (int i = 0; i < retractionNum; i++){
-			if (!(ctx.getChild(0) instanceof SysYParser.BlockContext)//如果该语句是block那么不需要缩进
+		if (!(ctx.getChild(0) instanceof SysYParser.BlockContext)//如果该语句是block那么不需要缩进
 			&& !(ctx.getParent() instanceof SysYParser.StmtContext//简单处理else if，让else 后的if不缩进 此处有问题
 			&& ((SysYParser.StmtContext) ctx.getParent()).ELSE() != null
 			&& ctx.getChild(0).getText().equals("if")
 			&& ctx.getParent().getChild(6).equals(ctx))){
-//			&& ctx.getParent().getChild(0) instanceof TerminalNode)) {
+				for (int i = 0; i < retractionNum; i++){
 				PrintRetraction();
 			}
 		}
@@ -223,9 +222,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		if (JudgeBehindWhileSingle(ctx)){
 			retractionNum++;
 		}
-//		else if (JudgeBehindElseSingle(ctx)){
-//			retractionNum++;
-//		}//会对大stmt的else换行造成错误
 		if (!(ctx.getChild(0) instanceof SysYParser.BlockContext)){
 			System.out.print("\u001B[97m"); //White
 			colorTemp = "\u001B[97m";
@@ -235,11 +231,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		} else {
 			visitChildren(ctx);
 		}
-//		if (JudgeIsIfBackSingle(ctx)
-//		&& ctx.getParent() instanceof SysYParser.StmtContext
-//		&& ((SysYParser.StmtContext) ctx.getParent()).ELSE() == null){
-//			retractionNum--;//只有if没有else的缩进减1 不会影响else//好像和else没有关系呢
-//		}//有问题，只有在整个stmt结束之前才会减去缩进//想错了，没事的
 		if (JudgeIsIfBackSingle(ctx)){
 			retractionNum--;//只要是if+if后single就要减去
 		}
@@ -249,18 +240,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		if (JudgeIsElseBackSingle(ctx)){
 			retractionNum--;
 		}
-//		if (JudgeIsIfBackSingle(ctx)){
-//			retractionNum--;
-//			if (ctx.getParent() instanceof SysYParser.StmtContext
-//			&&JudgeBehindElseSingle((SysYParser.StmtContext) ctx.getParent())){
-//				retractionNum++;
-//			}//有问题，会影响else的输出，应该迁移到else后面判断
-//		}
-//		if (JudgeIsElseBackSingle(ctx)){
-//			retractionNum--;
-//		}
 		if (!JudgeChildrenIsStmt(ctx)){ //判断子节点是否是Stmt
-			//System.out.println();
 			PrintLineBreak();
 		}
 		return null;
@@ -275,8 +255,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		System.out.print("\u001B[4m"); //Underlined
 		underLineTemp = "\u001B[4m";
 		visitChildren(ctx);
-		//System.out.println();//decl换行
-		PrintLineBreak();
+		PrintLineBreak();//decl换行
 		System.out.print("\u001B[0m");
 		colorTemp = "\u001B[39m";
 		underLineTemp = "";
@@ -286,10 +265,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 
 	@Override
 	public Void visitFuncDef(SysYParser.FuncDefContext ctx) {
-		//int lineNumber = ctx.getStart().getLine();
-//		if (lineNumber != 1){
 		if (IsOutput){
-			//System.out.println();
 			PrintLineBreak();
 		}
 		visitChildren(ctx);
@@ -355,11 +331,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			|| (node.getParent().getParent().getParent() != null
 			&& node.getParent().getParent() instanceof SysYParser.StmtContext
 			&& node.getParent().getParent().getParent() instanceof SysYParser.StmtContext)){
-				//System.out.print(' ');
 				PrintSpace();
 				System.out.print(COLORS[colorIndex]);
 				System.out.print(text);//函数声明中、stmt中if、else、while代码块中的作花括号
-				//System.out.println();
 				PrintLineBreak();
 			}else {//单独代码块中的左花括号
 				for (int i = 0; i<retractionNum-1;i++){
@@ -367,7 +341,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				}
 				System.out.print(COLORS[colorIndex]);
 				System.out.print(text);
-				//System.out.println();
 				PrintLineBreak();
 			}
 		}else {//声明语句的左花括号
@@ -388,7 +361,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		&& node.getParent().getParent() instanceof SysYParser.FuncDefContext){//判断是否是函数定义中的括号
 			System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 			System.out.print(text);
-			//System.out.println();
 			PrintLineBreak();
 		}else {
 			System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);

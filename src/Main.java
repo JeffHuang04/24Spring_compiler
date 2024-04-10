@@ -23,9 +23,6 @@ public class Main
         ParseTree tree = sysYParser.program();
         myVisitor visitor = new myVisitor();
         visitor.visit(tree);
-        if (!myListener.getError()) {
-
-        }
 
     }
 
