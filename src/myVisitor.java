@@ -53,9 +53,16 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				ClearColor(node);
 				if (flag == SysYParser.CONST || flag == SysYParser.INT
 				|| flag == SysYParser.VOID || flag == SysYParser.IF
-				 || flag == SysYParser.WHILE//|| flag == SysYParser.ELSE
+				 || flag == SysYParser.WHILE
 				){
 					PrintSpace();
+				}
+				if (flag == SysYParser.ELSE){
+					ParseTree behindElseStmt = node.getParent().getChild(6);
+					//System.out.print(behindElseStmt.getChild(0).getText());
+					if (behindElseStmt.getChild(0).getText().equals("if")){
+						PrintSpace();
+					}
 				}
 				if (flag == SysYParser.RETURN){
 					if (node.getParent() instanceof SysYParser.StmtContext
