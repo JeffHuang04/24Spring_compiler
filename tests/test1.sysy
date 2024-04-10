@@ -1,4 +1,11 @@
-int func() {
-        while (cond)
-            c = a + b;
+int main() {
+    if (a == 0){
+        return;
+        }
+    else if (b != 0)
+        {return 0;}
+    else
+        {a = 0;}
+    if (a == 1) { a = 1; }
 }
+

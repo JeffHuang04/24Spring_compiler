@@ -476,7 +476,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	}
 
 	private boolean JudgeIsElseBackSingle(SysYParser.StmtContext ctx) {//判断是否是else的后single
-		if (ctx.block() == null) {//非block
+		if (ctx.block() == null && ctx.IF() == null) {//非block非if
 			ParseTree parent = ctx.getParent();
 			if (parent instanceof SysYParser.StmtContext
 					&& ((SysYParser.StmtContext) parent).ELSE() != null
