@@ -2,8 +2,6 @@ int main() {
     while(1)
         if(1)
             if(2)
-                if(3);
-                else 3;
             else 2;
         else 1;
 }
