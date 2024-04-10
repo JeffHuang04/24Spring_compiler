@@ -61,17 +61,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				}
 				if (flag == SysYParser.ELSE){
 					ParseTree behindElseStmt = node.getParent().getChild(6);
-					//System.out.print(behindElseStmt.getChild(0).getText());
 					if (behindElseStmt.getChild(0).getText().equals("if")){
 						PrintSpace();
 					}
-				}//处理else后空格
-//				if (flag == SysYParser.ELSE){
-//					if (node.getParent() instanceof SysYParser.StmtContext
-//					&& JudgeBehindElseSingle((SysYParser.StmtContext) node.getParent())){//如果else语句是后面Single
-//						retractionNum++;
-//					}
-//				}//处理else+else单独single 后缩进、换行问题
+				}
 				if (flag == SysYParser.ELSE){
 					ParseTree behindElseStmt = node.getParent().getChild(6);
 					if (node.getParent() instanceof SysYParser.StmtContext
@@ -154,14 +147,12 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				if (Objects.equals(text, "{")
 				|| Objects.equals(text, "(")
 				|| Objects.equals(text,"[")){
-					//System.out.print(COLORS[colorIndex]);
 					if (Objects.equals(text, "(")
 					|| Objects.equals(text,"[")) {
 						System.out.print(COLORS[colorIndex]);
 						System.out.print(text);
 					}else {
 						LBrace(node);
-						//System.out.print(text);
 					}
 					ClearColor(node);
 					stackAllBracket.push(text);
@@ -172,7 +163,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 							|| (Objects.equals(text, "]") && stackAllBracket.peek().equals("["))
 					){
 						stackAllBracket.pop();
-						//System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 						if (Objects.equals(text, ")")
 						|| Objects.equals(text, "]")) {
 							System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
@@ -187,9 +177,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 								}
 							}
 						}else {
-							//System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 							RBrace(node);
-							//System.out.print(text);
 						}
 						ClearColor(node);
 						colorIndex = ((colorIndex - 1)+COLORS.length) % COLORS.length;
