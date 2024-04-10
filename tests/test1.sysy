@@ -1,11 +1,4 @@
 int func() {
-        if (cond){
+        while (cond)
             c = a + b;
-            }
-        else if (cond){
-            a = 1;
-            }
-        else{
-            a = 1;
-            }
 }

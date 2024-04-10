@@ -179,8 +179,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 							System.out.print(text);
 							if (Objects.equals(text,")")){
 								if (node.getParent() instanceof SysYParser.StmtContext
-								&& ((SysYParser.StmtContext) node.getParent()).IF()!=null//是IF语句中的右括号
-								&& JudgeBehindIfSingle((SysYParser.StmtContext)node.getParent())){//并且if语句后面是Single
+								&& ((((SysYParser.StmtContext) node.getParent()).IF()!=null//是IF语句中的右括号
+								&& JudgeBehindIfSingle((SysYParser.StmtContext)node.getParent()))
+								|| (((SysYParser.StmtContext) node.getParent()).WHILE()!=null//是WHILE语句中的右括号
+								&& JudgeBehindWhileSingle((SysYParser.StmtContext)node.getParent())))){//并且if语句后面是Single
 									PrintLineBreak();
 								}
 							}
@@ -217,6 +219,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		if (JudgeBehindIfSingle(ctx)){
 			retractionNum++;
 		}
+		if (JudgeBehindWhileSingle(ctx)){
+			retractionNum++;
+		}
 //		else if (JudgeBehindElseSingle(ctx)){
 //			retractionNum++;
 //		}//会对大stmt的else换行造成错误
@@ -236,6 +241,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 //		}//有问题，只有在整个stmt结束之前才会减去缩进//想错了，没事的
 		if (JudgeIsIfBackSingle(ctx)){
 			retractionNum--;//只要是if+if后single就要减去
+		}
+		if (JudgeIsWhileBackSingle(ctx)){
+			retractionNum--;
 		}
 		if (JudgeIsElseBackSingle(ctx)){
 			retractionNum--;
@@ -413,6 +421,16 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		}
 	}
 
+	private boolean JudgeBehindWhileSingle(SysYParser.StmtContext ctx){//判断while后是否是single
+		if (ctx.getChildCount() >= 5 && ctx.getChild(0).getText().equals("while")){//是while语句
+			if (ctx.getChild(4) instanceof SysYParser.StmtContext
+					&& ((SysYParser.StmtContext) ctx.getChild(4)).block() == null){//是非block语句
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private boolean JudgeBehindIfSingle(SysYParser.StmtContext ctx){//判断if后是否是single
 		if (ctx.getChildCount() >= 5 && ctx.getChild(0).getText().equals("if")){//是if语句
 			if (ctx.getChild(4) instanceof SysYParser.StmtContext
@@ -427,6 +445,18 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		if (ctx.getChildCount() >= 7 && ctx.getChild(5).getText().equals("else")){//是else语句
 			if (ctx.getChild(6) instanceof SysYParser.StmtContext
 					&& ((SysYParser.StmtContext) ctx.getChild(6)).block() == null){//是非block语句
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean JudgeIsWhileBackSingle(SysYParser.StmtContext ctx) {//判断是否是while的后single
+		if (ctx.block() == null) {//非block
+			ParseTree parent = ctx.getParent();
+			if (parent instanceof SysYParser.StmtContext
+					&& ((SysYParser.StmtContext) parent).WHILE() != null
+					&& parent.getChild(4).equals(ctx)) {
 				return true;
 			}
 		}
