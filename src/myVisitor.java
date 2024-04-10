@@ -65,7 +65,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 					if (behindElseStmt.getChild(0).getText().equals("if")){
 						PrintSpace();
 					}
-				}
+				}//处理else后空格
 				if (flag == SysYParser.RETURN){
 					if (node.getParent() instanceof SysYParser.StmtContext
 					&& ((SysYParser.StmtContext) node.getParent()).exp() != null){
@@ -162,6 +162,13 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 						|| Objects.equals(text, "]")) {
 							System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 							System.out.print(text);
+							if (Objects.equals(text,")")){
+								if (node.getParent() instanceof SysYParser.StmtContext
+								&& ((SysYParser.StmtContext) node.getParent()).IF()!=null//是IF语句中的右括号
+								&& JudgeBehindIfSingle((SysYParser.StmtContext)node.getParent())){//并且if语句后面是Single
+									PrintLineBreak();
+								}
+							}
 						}else {
 							//System.out.print(COLORS[(colorIndex-1+COLORS.length)%COLORS.length]);
 							RBrace(node);
@@ -185,10 +192,17 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	public Void visitStmt(SysYParser.StmtContext ctx) {
 		for (int i = 0; i < retractionNum; i++){
 			if (!(ctx.getChild(0) instanceof SysYParser.BlockContext)//如果该语句是block那么不需要缩进
-			&& !(ctx.getParent() instanceof SysYParser.StmtContext//简单处理else if
-			&& ctx.getParent().getChild(0) instanceof TerminalNode)) {
+			&& !(ctx.getParent() instanceof SysYParser.StmtContext//简单处理else if，让else 后的if不缩进 此处有问题
+			&& ((SysYParser.StmtContext) ctx.getParent()).ELSE() != null
+			&& ctx.getChild(0).getText().equals("if"))){
+//			&& ctx.getParent().getChild(0) instanceof TerminalNode)) {
 				PrintRetraction();
 			}
+		}
+		if (JudgeBehindIfSingle(ctx)){
+			retractionNum++;
+		}else if (JudgeBehindElseSingle(ctx)){
+			retractionNum++;
 		}
 		if (!(ctx.getChild(0) instanceof SysYParser.BlockContext)){
 			System.out.print("\u001B[97m"); //White
@@ -199,6 +213,21 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		} else {
 			visitChildren(ctx);
 		}
+		if (JudgeIsIfBackSingle(ctx)
+		&& ctx.getParent() instanceof SysYParser.StmtContext
+		&& ((SysYParser.StmtContext) ctx.getParent()).ELSE() == null){
+			retractionNum--;//只有if没有else的缩进减1 不会影响else
+		}
+//		if (JudgeIsIfBackSingle(ctx)){
+//			retractionNum--;
+//			if (ctx.getParent() instanceof SysYParser.StmtContext
+//			&&JudgeBehindElseSingle((SysYParser.StmtContext) ctx.getParent())){
+//				retractionNum++;
+//			}
+//		}//有问题，会影响else的输出，应该迁移到else后面判断
+//		if (JudgeIsElseBackSingle(ctx)){
+//			retractionNum--;
+//		}
 		if (!JudgeChildrenIsStmt(ctx)){ //判断子节点是否是Stmt
 			//System.out.println();
 			PrintLineBreak();
@@ -362,7 +391,47 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		}
 	}
 
-	private boolean JudgeElseIf(SysYParser.StmtContext ctx){
-		return true;
+	private boolean JudgeBehindIfSingle(SysYParser.StmtContext ctx){//判断if后是否是single
+		if (ctx.getChildCount() >= 5 && ctx.getChild(0).getText().equals("if")){//是if语句
+			if (ctx.getChild(4) instanceof SysYParser.StmtContext
+			&& ((SysYParser.StmtContext) ctx.getChild(4)).block() == null){//是非block语句
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean JudgeBehindElseSingle(SysYParser.StmtContext ctx){//判断else后是否是single
+		if (ctx.getChildCount() >= 7 && ctx.getChild(5).getText().equals("else")){//是else语句
+			if (ctx.getChild(6) instanceof SysYParser.StmtContext
+					&& ((SysYParser.StmtContext) ctx.getChild(6)).block() == null){//是非block语句
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean JudgeIsIfBackSingle(SysYParser.StmtContext ctx) {//判断是否是if的后single
+		if (ctx.block() == null) {//非block
+			ParseTree parent = ctx.getParent();
+			if (parent instanceof SysYParser.StmtContext
+					&& ((SysYParser.StmtContext) parent).IF() != null
+					&& parent.getChild(4).equals(ctx)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean JudgeIsElseBackSingle(SysYParser.StmtContext ctx) {//判断是否是else的后single
+		if (ctx.block() == null) {//非block
+			ParseTree parent = ctx.getParent();
+			if (parent instanceof SysYParser.StmtContext
+					&& ((SysYParser.StmtContext) parent).ELSE() != null
+					&& parent.getChild(6).equals(ctx)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
