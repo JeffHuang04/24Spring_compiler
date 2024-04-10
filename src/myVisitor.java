@@ -53,7 +53,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				ClearColor(node);
 				if (flag == SysYParser.CONST || flag == SysYParser.INT
 				|| flag == SysYParser.VOID || flag == SysYParser.IF
-				|| flag == SysYParser.ELSE || flag == SysYParser.WHILE
+				 || flag == SysYParser.WHILE//|| flag == SysYParser.ELSE
 				){
 					PrintSpace();
 				}
@@ -276,7 +276,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	}
 
 	private void LBrace(TerminalNode node){
-
 		String text = node.getText();
 		if (node.getParent() instanceof SysYParser.BlockContext){
 			if ((node.getParent().getParent() != null
