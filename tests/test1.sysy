@@ -1,7 +1,6 @@
-int main() {
-    while(1)
-        if(1)
-            if(2)
-            else 2;
-        else 1;
+int a(){}
+
+int main(){
+  int a = 1;
+  int b = a(a); // 报错(应报告类型10，该变量非函数)
 }

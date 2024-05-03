@@ -1,4 +1,3 @@
-import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -15,16 +14,17 @@ public class Main
         String source = args[0];
         CharStream input = CharStreams.fromFileName(source);
         SysYLexer sysYLexer = new SysYLexer(input);
-        myErrorListener myListener = new myErrorListener();
+        sysYLexer.removeErrorListeners();
         CommonTokenStream tokens = new CommonTokenStream(sysYLexer);
         SysYParser sysYParser = new SysYParser(tokens);
         sysYParser.removeErrorListeners();
-        sysYParser.addErrorListener(myListener);
         ParseTree tree = sysYParser.program();
         myVisitor visitor = new myVisitor();
+        OutputHelper outputHelper = new OutputHelper();
+        visitor.setOutputHelper(outputHelper);
         visitor.visit(tree);
-
+        if (!outputHelper.getIsErr()){
+            outputHelper.outputTrue();
+        }
     }
-
-
 }

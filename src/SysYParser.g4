@@ -39,7 +39,7 @@ varDecl
    ;
 
 varDef
-   : IDENT (L_BRACKT constExp R_BRACKT)*
+   : IDENT (L_BRACKT constExp R_BRACKT)*//数组a[5][4][3]
    | IDENT (L_BRACKT constExp R_BRACKT)* ASSIGN initVal
    ;
 
