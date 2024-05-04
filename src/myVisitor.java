@@ -146,6 +146,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	public Void visitStmt(SysYParser.StmtContext ctx) {
 		if (ctx.RETURN() != null && ctx.exp() != null){
 			Type funcTy = symbolTableStack.findNowFuncTy();
+			if (!(funcTy instanceof FunctionType)) {
+				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(), ctx.RETURN().getSymbol().getLine(), ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
+				return null;
+			}
 			Type returnTyExp = ((FunctionType) funcTy).getRetTy();
 			Type returnTyAct = calExpType(ctx.exp());
 			if (returnTyAct instanceof ArrayType){
