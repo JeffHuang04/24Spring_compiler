@@ -101,14 +101,19 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 	}
 	@Override
 	public Void visitInitVal(SysYParser.InitValContext ctx) {
-		if (ctx.L_BRACE() != null){
-			outputHelper.outputErr(5,ctx.L_BRACE().getSymbol().getLine(),"Type mismatched for assignment.");
-			return null;
-		}
 		return super.visitInitVal(ctx);
 	}
 	@Override
 	public Void visitConstInitVal(SysYParser.ConstInitValContext ctx) {
 		return super.visitConstInitVal(ctx);
+	}
+
+	@Override
+	public Void visitLVal(SysYParser.LValContext ctx) {
+		String LValName = ctx.IDENT().getText();
+		if (symbolTableStack.findAll(LValName) == null){
+			outputHelper.outputErr(1,ctx.IDENT().getSymbol().getLine(),"Undefined variable");
+		}//左值没有函数使用
+		return null;
 	}
 }
