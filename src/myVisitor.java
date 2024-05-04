@@ -167,7 +167,8 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				return null;
 			}
 		}
-		return super.visitStmt(ctx);
+		return null;
+//		return super.visitStmt(ctx);
 	}
 
 	private Type calExpType(SysYParser.ExpContext ctx){
