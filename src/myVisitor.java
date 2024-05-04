@@ -155,18 +155,11 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			}
 			if (returnTyAct instanceof IntType && returnTyExp instanceof IntType){
 				return null;
-			}else if (returnTyAct instanceof ArrayType && returnTyExp instanceof ArrayType){
-				if (((ArrayType) returnTyAct).getDimension() == ((ArrayType) returnTyExp).getDimension()){
-					return null;
-				}else {
-					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.RETURN().getSymbol().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
-					return null;
-				}
 			}
-//			else {
-//				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.RETURN().getSymbol().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
-//				return null;
-//			}
+			else {
+				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.RETURN().getSymbol().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
+				return null;
+			}
 		}
 		return super.visitStmt(ctx);
 	}
