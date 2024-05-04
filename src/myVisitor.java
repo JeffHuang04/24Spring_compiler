@@ -166,9 +166,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.RETURN().getSymbol().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
 				return null;
 			}
+			return null
 		}
-		return null;
-//		return super.visitStmt(ctx);
+//		return null;
+		return super.visitStmt(ctx);
 	}
 
 	private Type calExpType(SysYParser.ExpContext ctx){
