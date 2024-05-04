@@ -55,13 +55,30 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			outputHelper.outputErr(3,ctx.IDENT().getSymbol().getLine(),"Redefined variable");
             return null;//跳过重名参数
 		}
-		Type funcParamTy = null;
+		Type funcParamTy;
 		if (!ctx.L_BRACKT().isEmpty()){//表示是Array类型
 			funcParamTy = new ArrayType(new IntType(),ctx.L_BRACKT().size());
 		}else {//表示是Int类型
 			funcParamTy = new IntType();
 		}
 		symbolTableStack.put(funcFParamName,funcParamTy);
+		return null;
+	}
+
+	@Override
+	public Void visitConstDef(SysYParser.ConstDefContext ctx) {
+		String constDefName = ctx.IDENT().getText();
+		if (symbolTableStack.findNow(constDefName) != null ){
+			outputHelper.outputErr(3,ctx.IDENT().getSymbol().getLine(),"Redefined variable");
+			return null;//跳过重名定义
+		}
+		Type constDefTy;
+		if (!ctx.L_BRACKT().isEmpty()){//表示是Array类型
+			constDefTy = new ArrayType(new IntType(),ctx.L_BRACKT().size());
+		}else {//表示是Int类型
+			constDefTy = new IntType();
+		}
+		symbolTableStack.put(constDefName,constDefTy);
 		return null;
 	}
 }
