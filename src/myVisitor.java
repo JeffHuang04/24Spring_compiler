@@ -1,6 +1,5 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.TerminalNode;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -69,9 +68,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			paramsType.addAll(paramsTable.values());
 		}
 		Type funcType = new FunctionType(retTy,paramsType);
+		symbolTableStack.put(funcName,funcType);//如果是函数类型，直接在栈底push
 		visit(ctx.block());
 		symbolTableStack.popScope();//退出函数参数列表作用域
-		symbolTableStack.put(funcName,funcType);//在退出函数参数列表作用域后put函数名
 		return null;
 	}
 
@@ -138,19 +137,50 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 
 	@Override
 	public Void visitLVal(SysYParser.LValContext ctx) {
+		calLValType(ctx);
+		return null;
+	}
+
+	@Override
+	public Void visitStmt(SysYParser.StmtContext ctx) {
+		if (ctx.RETURN() != null && ctx.exp() != null){
+			Type funcTy = symbolTableStack.findNowFuncTy();
+			int a = 1;
+		}
+		return super.visitStmt(ctx);
+	}
+
+//	private Type calExpType(SysYParser.ExpContext ctx){
+//		if (ctx.L_PAREN() != null && !ctx.exp().isEmpty()){
+//			return calExpType(ctx.exp(0));
+//		} else if (ctx.lVal() != null) {
+//			return calLValType(ctx.lVal());
+//		} else if (ctx.number() != null){
+//			return new IntType();
+//		} else if (ctx.IDENT() != null) {
+//			String funcName = ctx.IDENT().getText();
+//			if (symbolTableStack.findAll(funcName) == null){
+//				outputHelper.outputErr(ErrorType.UNDEFINED_FUNCTION.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.UNDEFINED_FUNCTION.getMessage());
+//				return null;
+//			}
+//
+//		}
+//
+//	}
+	private Type calLValType(SysYParser.LValContext ctx){
 		String LValName = ctx.IDENT().getText();
 		if (symbolTableStack.findAll(LValName) == null){//左值没有函数使用
 			outputHelper.outputErr(ErrorType.UNDEFINED_VARIABLE.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.UNDEFINED_VARIABLE.getMessage());
 			return null;
-		} else if (symbolTableStack.findAll(LValName) instanceof IntType && !ctx.L_BRACKT().isEmpty()) {
+		} else if ((symbolTableStack.findAll(LValName) instanceof IntType||
+				symbolTableStack.findAll(LValName) instanceof FunctionType) && !ctx.L_BRACKT().isEmpty()) {
 			outputHelper.outputErr(ErrorType.NOT_AN_ARRAY.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.NOT_AN_ARRAY.getMessage());
-			return null;
-		}
-		else if (symbolTableStack.findAll(LValName) instanceof FunctionType && ctx.getParent() instanceof SysYParser.StmtContext && ctx.getParent().getChild(1).getText().equals("=")) {
+			return null;//对IntType或函数使用下标运算符
+		} else if (symbolTableStack.findAll(LValName) instanceof FunctionType && ctx.getParent() instanceof SysYParser.StmtContext && ctx.getParent().getChild(1).getText().equals("=")) {
 			outputHelper.outputErr(ErrorType.ILLEGAL_ASSIGNMENT_TARGET.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.ILLEGAL_ASSIGNMENT_TARGET.getMessage());
 			return null;
-		}
+		}//赋值号左侧是函数名
 
-		return null;
+		return new IntType();
 	}
 }

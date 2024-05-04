@@ -19,8 +19,12 @@ public class SymbolTableStack {
 		}
 	}
 	public void put(String name, Type type){
-		if (!stack.empty()){
-			stack.peek().addSymbol(name, type);
+		if (type instanceof FunctionType){
+			stack.get(0).addSymbol(name,type);
+		}else {
+			if (!stack.empty()) {
+				stack.peek().addSymbol(name, type);
+			}
 		}
 	}
 	public Type findAll(String name){
@@ -35,4 +39,12 @@ public class SymbolTableStack {
 	public Type findNow(String name){
 		return stack.peek().find(name);
 	}//查找该作用域是否有该元素(用于定义)
+	public Type findNowFuncTy(){
+		Map<String,Type> tmp = stack.get(0).getTable();
+		Type lastVale = null;
+		for (Type value : tmp.values()){
+			lastVale = value;
+		}
+		return lastVale;
+	}
 }
