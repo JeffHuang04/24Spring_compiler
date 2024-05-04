@@ -143,10 +143,11 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		} else if (symbolTableStack.findAll(LValName) instanceof IntType && !ctx.L_BRACKT().isEmpty()) {
 			outputHelper.outputErr(ErrorType.NOT_AN_ARRAY.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.NOT_AN_ARRAY.getMessage());
 			return null;
-		} else if (symbolTableStack.findAll(LValName) instanceof FunctionType) {
-			outputHelper.outputErr(ErrorType.ILLEGAL_ASSIGNMENT_TARGET.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.ILLEGAL_ASSIGNMENT_TARGET.getMessage());
-			return null;
 		}
+//		else if (symbolTableStack.findAll(LValName) instanceof FunctionType) {
+//			outputHelper.outputErr(ErrorType.ILLEGAL_ASSIGNMENT_TARGET.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.ILLEGAL_ASSIGNMENT_TARGET.getMessage());
+//			return null;
+//		}
 
 		return null;
 	}
