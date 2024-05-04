@@ -150,23 +150,23 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		return super.visitStmt(ctx);
 	}
 
-	private Type calExpType(SysYParser.ExpContext ctx){
-		if (ctx.L_PAREN() != null && !ctx.exp().isEmpty()){
-			return calExpType(ctx.exp(0));
-		} else if (ctx.lVal() != null) {
-			return calLValType(ctx.lVal());
-		} else if (ctx.number() != null){
-			return new IntType();
-		} else if (ctx.IDENT() != null) {
-			String funcName = ctx.IDENT().getText();
-			if (symbolTableStack.findAll(funcName) == null){
-				outputHelper.outputErr(ErrorType.UNDEFINED_FUNCTION.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.UNDEFINED_FUNCTION.getMessage());
-				return null;
-			}
-
-		}
-
-	}
+//	private Type calExpType(SysYParser.ExpContext ctx){
+//		if (ctx.L_PAREN() != null && !ctx.exp().isEmpty()){
+//			return calExpType(ctx.exp(0));
+//		} else if (ctx.lVal() != null) {
+//			return calLValType(ctx.lVal());
+//		} else if (ctx.number() != null){
+//			return new IntType();
+//		} else if (ctx.IDENT() != null) {
+//			String funcName = ctx.IDENT().getText();
+//			if (symbolTableStack.findAll(funcName) == null){
+//				outputHelper.outputErr(ErrorType.UNDEFINED_FUNCTION.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.UNDEFINED_FUNCTION.getMessage());
+//				return null;
+//			}
+//
+//		}
+//
+//	}
 	private Type calLValType(SysYParser.LValContext ctx){
 		String LValName = ctx.IDENT().getText();
 		if (symbolTableStack.findAll(LValName) == null){//左值没有函数使用
