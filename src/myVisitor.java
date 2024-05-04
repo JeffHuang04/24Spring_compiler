@@ -81,4 +81,21 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		symbolTableStack.put(constDefName,constDefTy);
 		return null;
 	}
+
+	@Override
+	public Void visitVarDef(SysYParser.VarDefContext ctx) {
+		String varDefName = ctx.IDENT().getText();
+		if (symbolTableStack.findNow(varDefName) != null ){
+			outputHelper.outputErr(3,ctx.IDENT().getSymbol().getLine(),"Redefined variable");
+			return null;//跳过重名定义
+		}
+		Type varDefTy;
+		if (!ctx.L_BRACKT().isEmpty()){//表示是Array类型
+			varDefTy = new ArrayType(new IntType(),ctx.L_BRACKT().size());
+		}else {//表示是Int类型
+			varDefTy = new IntType();
+		}
+		symbolTableStack.put(varDefName,varDefTy);
+		return null;
+	}
 }
