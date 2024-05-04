@@ -1,7 +1,6 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.ArrayList;
-import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Map;
 
@@ -144,24 +143,24 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 
 	@Override
 	public Void visitStmt(SysYParser.StmtContext ctx) {
-		if (ctx.RETURN() != null && ctx.exp() != null){
-			Type funcTy = symbolTableStack.findNowFuncTy();
-			Type returnTyExp = ((FunctionType) funcTy).getRetTy();
-			Type returnTyAct = calExpType(ctx.exp());
-			if (returnTyAct instanceof IntType && returnTyExp instanceof IntType){
-				return null;
-			}else if (returnTyAct instanceof ArrayType && returnTyExp instanceof ArrayType){
-				if (((ArrayType) returnTyAct).getDimension() == ((ArrayType) returnTyExp).getDimension()){
-					return null;
-				}else {
-					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.RETURN().getSymbol().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
-					return null;
-				}
-			}else {
-				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.RETURN().getSymbol().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
-				return null;
-			}
-		}
+//		if (ctx.RETURN() != null && ctx.exp() != null){
+//			Type funcTy = symbolTableStack.findNowFuncTy();
+//			Type returnTyExp = ((FunctionType) funcTy).getRetTy();
+//			Type returnTyAct = calExpType(ctx.exp());
+//			if (returnTyAct instanceof IntType && returnTyExp instanceof IntType){
+//				return null;
+//			}else if (returnTyAct instanceof ArrayType && returnTyExp instanceof ArrayType){
+//				if (((ArrayType) returnTyAct).getDimension() == ((ArrayType) returnTyExp).getDimension()){
+//					return null;
+//				}else {
+//					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.RETURN().getSymbol().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
+//					return null;
+//				}
+//			}else {
+//				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.RETURN().getSymbol().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
+//				return null;
+//			}
+//		}
 		return super.visitStmt(ctx);
 	}
 
