@@ -13,4 +13,7 @@ public class ArrayType extends Type{
 	public Type getContained() {
 		return contained;
 	}
+	public int getDimension() {
+		return dimension;
+	}
 }
