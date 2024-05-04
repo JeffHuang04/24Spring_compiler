@@ -1,4 +1,6 @@
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -144,7 +146,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			outputHelper.outputErr(ErrorType.NOT_AN_ARRAY.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.NOT_AN_ARRAY.getMessage());
 			return null;
 		}
-		else if (symbolTableStack.findAll(LValName) instanceof FunctionType && ctx.getParent() instanceof SysYParser.StmtContext) {
+		else if (symbolTableStack.findAll(LValName) instanceof FunctionType && ctx.getParent() instanceof SysYParser.StmtContext && ((SysYParser.StmtContext) ctx.getParent()).ASSIGN() != null) {
 			outputHelper.outputErr(ErrorType.ILLEGAL_ASSIGNMENT_TARGET.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.ILLEGAL_ASSIGNMENT_TARGET.getMessage());
 			return null;
 		}
