@@ -146,7 +146,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			outputHelper.outputErr(ErrorType.NOT_AN_ARRAY.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.NOT_AN_ARRAY.getMessage());
 			return null;
 		}
-		else if (symbolTableStack.findAll(LValName) instanceof FunctionType && ctx.getParent() instanceof SysYParser.StmtContext && ctx.) {
+		else if (symbolTableStack.findAll(LValName) instanceof FunctionType && ctx.getParent() instanceof SysYParser.StmtContext && ctx.getParent().getChild(1).getText().equals("=")) {
 			outputHelper.outputErr(ErrorType.ILLEGAL_ASSIGNMENT_TARGET.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.ILLEGAL_ASSIGNMENT_TARGET.getMessage());
 			return null;
 		}
