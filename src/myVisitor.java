@@ -155,8 +155,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			}
 			if (returnTyAct instanceof IntType && returnTyExp instanceof IntType){
 				return null;
-			}
-			else {
+			} else {
 				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.RETURN().getSymbol().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
 				return null;
 			}
