@@ -144,9 +144,15 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 
 	@Override
 	public Void visitStmt(SysYParser.StmtContext ctx) {
-		if (ctx.RETURN() != null && ctx.exp() != null){
+		if (ctx.RETURN() != null){
 			Type funcTy = symbolTableStack.findNowFuncTy();
 			Type returnTyExp = ((FunctionType) funcTy).getRetTy();
+			if (ctx.exp()==null){
+				if (!(returnTyExp instanceof VoidType)) {
+					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(), ctx.RETURN().getSymbol().getLine(), ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
+				}
+				return null;
+			}
 			Type returnTyAct = calExpType(ctx.exp());
 			if (returnTyAct instanceof ArrayType){
 				if (((ArrayType) returnTyAct).getDimension() == 0){
@@ -155,11 +161,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			}
 			if (returnTyAct instanceof IntType && returnTyExp instanceof IntType){
 				return null;
+			} else {
+				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.exp().getStart().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
+				return null;
 			}
-//			else {
-//				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.exp().getStart().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
-//				return null;
-//			}
 		}
 		return super.visitStmt(ctx);
 	}
