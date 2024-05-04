@@ -162,13 +162,12 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.RETURN().getSymbol().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
 					return null;
 				}
-			}else {
-				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.RETURN().getSymbol().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
-				return null;
 			}
-			return null
+//			else {
+//				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(),ctx.RETURN().getSymbol().getLine(),ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
+//				return null;
+//			}
 		}
-//		return null;
 		return super.visitStmt(ctx);
 	}
 
