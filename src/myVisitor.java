@@ -180,7 +180,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		} else if (ctx.number() != null){
 			return new IntType();
 		} else if (ctx.IDENT() != null) {//代表的是函数
-			System.out.println(ctx.getText());
 			String funcName = ctx.IDENT().getText();
 			if (symbolTableStack.findAll(funcName) == null){
 				outputHelper.outputErr(ErrorType.UNDEFINED_FUNCTION.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.UNDEFINED_FUNCTION.getMessage());
