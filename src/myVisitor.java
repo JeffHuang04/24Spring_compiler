@@ -286,8 +286,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			int dimension = ((ArrayType) LValTy).getDimension()-size;
 			if (dimension < 0){
 				outputHelper.outputErr(ErrorType.NOT_AN_ARRAY.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.NOT_AN_ARRAY.getMessage());
+				return null;
+			}else {
+				return new ArrayType(new IntType(), ((ArrayType) LValTy).getDimension() - size);
 			}
-			return new ArrayType(new IntType(),((ArrayType) LValTy).getDimension()-size);
 		} else if (LValTy instanceof FunctionType) {
 			return LValTy;//不确定正确性
 		}
