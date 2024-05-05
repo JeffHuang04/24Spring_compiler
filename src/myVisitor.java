@@ -224,10 +224,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 //							}//类型不一样 报错
 //						}
 //					}
-				}else {
-					outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
-					return null;
-				}//数量不一样 报错
+//				}else {
+//					outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
+//					return null;
+//				}//数量不一样 报错
 			}
 			else if (!(funcFParamsExp.isEmpty()&&funcRParamsAct.isEmpty())){
 				outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
