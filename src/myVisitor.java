@@ -166,11 +166,11 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		return super.visitStmt(ctx);
 	}
 
-//	@Override
-//	public Void visitExp(SysYParser.ExpContext ctx) {
-//		calExpType(ctx);
-//		return null;
-//	}
+	@Override
+	public Void visitExp(SysYParser.ExpContext ctx) {
+		calExpType(ctx);
+		return null;
+	}
 
 	private Type calExpType(SysYParser.ExpContext ctx){
 		if (ctx.L_PAREN() != null && !ctx.exp().isEmpty()){
