@@ -4,5 +4,5 @@ int a(int a,int b){
 int main(){
     int ab = 1;
     int bc = 0;
-    return a(ab,bc);
+    return a(ab+bc,bc);
 }
