@@ -162,11 +162,35 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				}
 			}
 			return null;
+		} else if (ctx.ASSIGN() != null) {
+			Type LValTy = calLValType(ctx.lVal());
+			Type expTy = calExpType(ctx.exp());
+			if (LValTy != null && expTy != null){
+				if (LValTy instanceof ArrayType){
+					if (((ArrayType) LValTy).getDimension() == 0){
+						LValTy = new IntType();
+					}
+				}
+				if (expTy instanceof ArrayType){
+					if (((ArrayType) expTy).getDimension() == 0){
+						expTy = new IntType();
+					}
+				}
+				if (LValTy instanceof IntType && expTy instanceof IntType){
+					return null;
+				} else if (LValTy instanceof ArrayType && expTy instanceof ArrayType) {
+					if (((ArrayType) LValTy).getDimension() == ((ArrayType) expTy).getDimension()){
+						return null;
+					}else {
+						outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_ASSIGNMENT.getCode(),ctx.lVal().getStart().getLine(),ErrorType.TYPE_MISMATCHED_ASSIGNMENT.getMessage());
+						return null;
+					}
+				} else {
+					return null;
+				}
+			}
+			return null;
 		}
-//		else if (ctx.ASSIGN() != null) {
-//			Type LValTy = calLValType(ctx.lVal());
-//			Type
-//		}
 		return super.visitStmt(ctx);
 	}
 
