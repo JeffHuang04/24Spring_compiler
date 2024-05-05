@@ -182,12 +182,16 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		} else if (ctx.IDENT() != null) {//代表的是函数
 			String funcName = ctx.IDENT().getText();
 			Type funcTy = symbolTableStack.findFuncTy(funcName);
+			ArrayList<Type> funcFParams;
 			if (funcTy == null){//findAll也不对
 				outputHelper.outputErr(ErrorType.UNDEFINED_FUNCTION.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.UNDEFINED_FUNCTION.getMessage());
 				return null;
 			} else if (!(funcTy instanceof FunctionType)) {
 				outputHelper.outputErr(ErrorType.NOT_A_FUNCTION.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.NOT_A_FUNCTION.getMessage());
-			}//保证funcTy是函数类型的
+				return null;//保证funcTy是函数类型的
+			}else {
+				funcFParams =  ((FunctionType) funcTy).getParamsType();
+			}
 			ArrayList<Type> funcRParams = new ArrayList<>();
 			if (ctx.funcRParams() != null){
 				for (int i = 0; i<ctx.funcRParams().param().size();i++){
@@ -198,7 +202,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				}
 			}
 //			Type funcTy = symbolTableStack.findNowFuncTy();不是当前的函数，而是要找的函数
-			ArrayList<Type> funcFParams= ((FunctionType) funcTy).getParamsType();
 			if (!funcFParams.isEmpty() && !funcRParams.isEmpty()){//两者均为非空
 				if (funcFParams.size() == funcRParams.size()){
 					for (int i = 0; i < funcFParams.size();i++){
