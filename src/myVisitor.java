@@ -283,6 +283,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			return new IntType();
 		} else if (LValTy instanceof ArrayType) {
 			int size = ctx.L_BRACKT().size();
+			int dimension = ((ArrayType) LValTy).getDimension()-size;
+			if (dimension < 0){
+				outputHelper.outputErr(ErrorType.NOT_AN_ARRAY.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.NOT_AN_ARRAY.getMessage());
+			}
 			return new ArrayType(new IntType(),((ArrayType) LValTy).getDimension()-size);
 		} else if (LValTy instanceof FunctionType) {
 			return LValTy;//不确定正确性
