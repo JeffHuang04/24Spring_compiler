@@ -201,7 +201,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 					}
 				}
 			}
-			Type funcTy = symbolTableStack.findNowFuncTy();不是当前的函数，而是要找的函数
+			////Type funcTy = symbolTableStack.findNowFuncTy();//不是当前的函数，而是要找的函数
 			if (!funcFParamsExp.isEmpty() && !funcRParamsAct.isEmpty()){//两者均为非空
 				if (funcFParamsExp.size() == funcRParamsAct.size()){
 					for (int i = 0; i < funcFParamsExp.size();i++){
