@@ -216,11 +216,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 								outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
 								return null;
 							}//维数不一样 报错
-//						}else {
-//							if (((ArrayType) funcFParamsExp.get(i)).getDimension() != ((ArrayType) funcRParamsAct.get(i)).getDimension()){
-//								outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
-//								return null;
-//							}//类型不一样 报错
+						}else {
+							outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
+							return null;//类型不一样 报错
 						}
 					}
 				}else {
