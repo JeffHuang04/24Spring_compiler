@@ -209,7 +209,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 								funcRParamsAct.set(i,new IntType());
 							}
 						}
-//						if (funcFParamsExp.get(i) instanceof IntType && funcRParamsAct.get(i) instanceof IntType){
+						if (funcFParamsExp.get(i) instanceof IntType && funcRParamsAct.get(i) instanceof IntType){
 //
 //						} else if (funcFParamsExp.get(i) instanceof ArrayType && funcRParamsAct.get(i) instanceof ArrayType) {
 //							if (((ArrayType) funcFParamsExp.get(i)).getDimension() != ((ArrayType) funcRParamsAct.get(i)).getDimension()){
@@ -221,7 +221,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 //								outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
 //								return null;
 //							}//类型不一样 报错
-//						}
+						}
 					}
 				}else {
 					outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
