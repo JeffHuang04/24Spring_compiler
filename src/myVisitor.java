@@ -211,11 +211,11 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 						}
 						if (funcFParamsExp.get(i) instanceof IntType && funcRParamsAct.get(i) instanceof IntType){
 //
-//						} else if (funcFParamsExp.get(i) instanceof ArrayType && funcRParamsAct.get(i) instanceof ArrayType) {
-//							if (((ArrayType) funcFParamsExp.get(i)).getDimension() != ((ArrayType) funcRParamsAct.get(i)).getDimension()){
-//								outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
-//								return null;
-//							}//维数不一样 报错
+						} else if (funcFParamsExp.get(i) instanceof ArrayType && funcRParamsAct.get(i) instanceof ArrayType) {
+							if (((ArrayType) funcFParamsExp.get(i)).getDimension() != ((ArrayType) funcRParamsAct.get(i)).getDimension()){
+								outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
+								return null;
+							}//维数不一样 报错
 //						}else {
 //							if (((ArrayType) funcFParamsExp.get(i)).getDimension() != ((ArrayType) funcRParamsAct.get(i)).getDimension()){
 //								outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
