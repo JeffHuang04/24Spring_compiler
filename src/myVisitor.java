@@ -202,6 +202,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				}
 			}
 			boolean is = (!funcFParamsExp.isEmpty() && !funcRParamsAct.isEmpty());
+			if (is){
+				int a = 1;
+			}
 //			if (!funcFParamsExp.isEmpty() && !funcRParamsAct.isEmpty()){//两者均为非空
 //				if (funcFParamsExp.size() == funcRParamsAct.size()){
 //					for (int i = 0; i < funcFParamsExp.size();i++){
