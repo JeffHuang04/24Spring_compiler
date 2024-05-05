@@ -204,11 +204,11 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			if (!funcFParamsExp.isEmpty() && !funcRParamsAct.isEmpty()){//两者均为非空
 				if (funcFParamsExp.size() == funcRParamsAct.size()){
 					for (int i = 0; i < funcFParamsExp.size();i++){
-//						if (funcRParamsAct.get(i) instanceof ArrayType){
-//							if ( ((ArrayType) funcRParamsAct.get(i)).getDimension() == 0){
-//								funcRParamsAct.set(i,new IntType());
-//							};
-//						}
+						if (funcRParamsAct.get(i) instanceof ArrayType){
+							if ( ((ArrayType) funcRParamsAct.get(i)).getDimension() == 0){
+								funcRParamsAct.set(i,new IntType());
+							};
+						}
 						if (funcFParamsExp.get(i) instanceof IntType && funcRParamsAct.get(i) instanceof IntType){
 
 						} else if (funcFParamsExp.get(i) instanceof ArrayType && funcRParamsAct.get(i) instanceof ArrayType) {
