@@ -186,6 +186,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 						return null;
 					}
 				} else {
+					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_ASSIGNMENT.getCode(),ctx.lVal().getStart().getLine(),ErrorType.TYPE_MISMATCHED_ASSIGNMENT.getMessage());
 					return null;
 				}
 			}
