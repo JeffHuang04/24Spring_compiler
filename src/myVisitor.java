@@ -163,6 +163,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			}
 			return null;
 		}
+//		else if (ctx.ASSIGN() != null) {
+//			Type LValTy = calLValType(ctx.lVal());
+//			Type
+//		}
 		return super.visitStmt(ctx);
 	}
 
@@ -250,14 +254,16 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				}
 				if (expTy1 instanceof IntType && expTy2 instanceof IntType){
 					return new IntType();
-				} else if (expTy1 instanceof ArrayType && expTy2 instanceof ArrayType) {
-					if (((ArrayType) expTy1).getDimension() == ((ArrayType) expTy2).getDimension()){
-						return new ArrayType(new IntType(),((ArrayType) expTy1).getDimension());
-					}else {
-						outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_OPERANDS.getCode(), ctx.exp(0).getStart().getLine(),ErrorType.TYPE_MISMATCHED_OPERANDS.getMessage());
-						return null;
-					}
-				}else {
+				}
+//				else if (expTy1 instanceof ArrayType && expTy2 instanceof ArrayType) {
+//					if (((ArrayType) expTy1).getDimension() == ((ArrayType) expTy2).getDimension()){
+//						return new ArrayType(new IntType(),((ArrayType) expTy1).getDimension());
+//					}else {
+//						outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_OPERANDS.getCode(), ctx.exp(0).getStart().getLine(),ErrorType.TYPE_MISMATCHED_OPERANDS.getMessage());
+//						return null;
+//					}
+//				}//只要不是Int都错
+				else {
 					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_OPERANDS.getCode(), ctx.exp(0).getStart().getLine(),ErrorType.TYPE_MISMATCHED_OPERANDS.getMessage());
 					return null;
 				}

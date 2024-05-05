@@ -1,9 +1,4 @@
-int a(int a,int b){
-    return 1;
-}
 void main(){
-    int a = 1;
-    int b[1] = {2};
-    int c = a + b[1];
-    return a(a + b[1],c);
+    int a[1],b[1],c[1];
+    int d = a + b + c;
 }
