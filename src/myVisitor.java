@@ -201,6 +201,40 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 		return null;
 	}
 
+	@Override
+	public Void visitCond(SysYParser.CondContext ctx) {
+		calCond(ctx);
+		return null;
+	}
+
+	public Type calCond(SysYParser.CondContext ctx){
+		if (ctx.exp() != null){
+			return calExpType(ctx.exp());
+		}else {
+			Type condTy1 = calCond(ctx.cond(0));
+			Type condTy2 = calCond(ctx.cond(1));
+			if (condTy1!=null && condTy2!=null){
+				if (condTy1 instanceof ArrayType){
+					if (((ArrayType) condTy1).getDimension() == 0){
+						condTy1 = new IntType();
+					}
+				}
+				if (condTy2 instanceof ArrayType){
+					if (((ArrayType) condTy2).getDimension() == 0){
+						condTy2 = new IntType();
+					}
+				}
+				if (condTy1 instanceof IntType && condTy2 instanceof IntType){
+					return null;
+				}else {
+					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_OPERANDS.getCode(), ctx.cond(0).getStart().getLine(),ErrorType.TYPE_MISMATCHED_OPERANDS.getMessage());
+					return null;
+				}
+			}
+			return null;
+		}
+	}
+
 	private Type calExpType(SysYParser.ExpContext ctx){
 		if (ctx.L_PAREN() != null && !ctx.exp().isEmpty()){
 			return calExpType(ctx.exp(0));
