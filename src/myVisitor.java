@@ -230,7 +230,7 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				return null;
 			}//funcRParams为空，触发空指针了
 			//至此，函数参数问题解决了
-
+			return ((FunctionType) funcTy).getRetTy();
 
 		} else if (ctx.unaryOp() != null && !ctx.exp().isEmpty()) {
 			return calExpType(ctx.exp(0));
@@ -264,7 +264,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			}
 			return null;
 		}
-		return null;
 	}
 	private Type calLValType(SysYParser.LValContext ctx){
 		String LValName = ctx.IDENT().getText();
