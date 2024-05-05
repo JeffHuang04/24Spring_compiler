@@ -232,7 +232,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
 				return null;
 			}
-			return null;
 		}
 		return null;
 	}
