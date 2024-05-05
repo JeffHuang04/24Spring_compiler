@@ -262,7 +262,18 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			return ((FunctionType) funcTy).getRetTy();
 
 		} else if (ctx.unaryOp() != null && !ctx.exp().isEmpty()) {
-			return calExpType(ctx.exp(0));
+			Type expTy = calExpType(ctx.exp(0));
+			if (expTy instanceof ArrayType){
+				if (((ArrayType) expTy).getDimension() == 0){
+					expTy = new IntType();
+				}
+			}
+			if (expTy instanceof IntType){
+				return expTy;
+			}else {
+				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_OPERANDS.getCode(), ctx.exp(0).getStart().getLine(),ErrorType.TYPE_MISMATCHED_OPERANDS.getMessage());
+				return null;
+			}
 		} else {//两侧运算符
 			Type expTy1 = calExpType(ctx.exp(0));
 			Type expTy2 = calExpType(ctx.exp(1));
