@@ -229,9 +229,40 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 				outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
 				return null;
 			}//funcRParams为空，触发空指针了
+			//至此，函数参数问题解决了
 
 
-
+		} else if (ctx.unaryOp() != null && !ctx.exp().isEmpty()) {
+			return calExpType(ctx.exp(0));
+		} else {//两侧运算符
+			Type expTy1 = calExpType(ctx.exp(0));
+			Type expTy2 = calExpType(ctx.exp(1));
+			if (expTy1!=null && expTy2!=null){//都为非空情况
+				if (expTy1 instanceof ArrayType){
+					if (((ArrayType) expTy1).getDimension() == 0){
+						expTy1 = new IntType();
+					}
+				}
+				if (expTy2 instanceof ArrayType){
+					if (((ArrayType) expTy2).getDimension() == 0){
+						expTy2 = new IntType();
+					}
+				}
+				if (expTy1 instanceof IntType && expTy2 instanceof IntType){
+					return new IntType();
+				} else if (expTy1 instanceof ArrayType && expTy2 instanceof ArrayType) {
+					if (((ArrayType) expTy1).getDimension() == ((ArrayType) expTy2).getDimension()){
+						return new ArrayType(new IntType(),((ArrayType) expTy1).getDimension());
+					}else {
+						outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_OPERANDS.getCode(), ctx.exp(0).getStart().getLine(),ErrorType.TYPE_MISMATCHED_OPERANDS.getMessage());
+						return null;
+					}
+				}else {
+					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_OPERANDS.getCode(), ctx.exp(0).getStart().getLine(),ErrorType.TYPE_MISMATCHED_OPERANDS.getMessage());
+					return null;
+				}
+			}
+			return null;
 		}
 		return null;
 	}
