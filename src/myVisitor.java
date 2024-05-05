@@ -181,53 +181,55 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			return new IntType();
 		} else if (ctx.IDENT() != null) {//代表的是函数
 			String funcName = ctx.IDENT().getText();
-			if (symbolTableStack.findAll(funcName) == null){
+			Type funcTy = symbolTableStack.findFuncTy(funcName);
+			if (funcTy == null){//findAll也不对
 				outputHelper.outputErr(ErrorType.UNDEFINED_FUNCTION.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.UNDEFINED_FUNCTION.getMessage());
 				return null;
+			} else if (!(funcTy instanceof FunctionType)) {
+				outputHelper.outputErr(ErrorType.NOT_A_FUNCTION.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.NOT_A_FUNCTION.getMessage());
+			}//保证funcTy是函数类型的
+			ArrayList<Type> funcRParams = new ArrayList<>();
+			if (ctx.funcRParams() != null){
+				for (int i = 0; i<ctx.funcRParams().param().size();i++){
+					Type tmp = calExpType(ctx.funcRParams().param(i).exp());
+					if (tmp != null){//确保非空才添加
+						funcRParams.add(tmp);
+					}
+				}
 			}
-			return null;
-//			ArrayList<Type> funcRParams = new ArrayList<>();
-//			if (ctx.funcRParams() != null){
-//				for (int i = 0; i<ctx.funcRParams().param().size();i++){
-//					Type tmp = calExpType(ctx.funcRParams().param(i).exp());
-//					if (tmp != null){//确保非空才添加
-//						funcRParams.add(tmp);
-//					}
-//				}
-//			}
-//			Type funcTy = symbolTableStack.findNowFuncTy();
-//			ArrayList<Type> funcFParams= ((FunctionType) funcTy).getParamsType();
-//			if (!funcFParams.isEmpty() && !funcRParams.isEmpty()){//两者均为非空
-//				if (funcFParams.size() == funcRParams.size()){
-//					for (int i = 0; i < funcFParams.size();i++){
-//						if (funcRParams.get(i) instanceof ArrayType){
-//							if ( ((ArrayType) funcRParams.get(i)).getDimension() == 0){
-//								funcRParams.set(i,new IntType());
-//							};
-//						}
-//						if (funcFParams.get(i) instanceof IntType && funcRParams.get(i) instanceof IntType){
-//
-//						} else if (funcFParams.get(i) instanceof ArrayType && funcRParams.get(i) instanceof ArrayType) {
-//							if (((ArrayType) funcFParams.get(i)).getDimension() != ((ArrayType) funcRParams.get(i)).getDimension()){
-//								outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
-//								return null;
-//							}//维数不一样 报错
-//						}else {
-//							if (((ArrayType) funcFParams.get(i)).getDimension() != ((ArrayType) funcRParams.get(i)).getDimension()){
-//								outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
-//								return null;
-//							}//类型不一样 报错
-//						}
-//					}
-//				}else {
-//					outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
-//					return null;
-//				}//数量不一样 报错
-//			}
-//			else if (!(funcFParams.isEmpty()&&funcRParams.isEmpty())){
-//				outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
-//				return null;
-//			}
+//			Type funcTy = symbolTableStack.findNowFuncTy();不是当前的函数，而是要找的函数
+			ArrayList<Type> funcFParams= ((FunctionType) funcTy).getParamsType();
+			if (!funcFParams.isEmpty() && !funcRParams.isEmpty()){//两者均为非空
+				if (funcFParams.size() == funcRParams.size()){
+					for (int i = 0; i < funcFParams.size();i++){
+						if (funcRParams.get(i) instanceof ArrayType){
+							if ( ((ArrayType) funcRParams.get(i)).getDimension() == 0){
+								funcRParams.set(i,new IntType());
+							};
+						}
+						if (funcFParams.get(i) instanceof IntType && funcRParams.get(i) instanceof IntType){
+
+						} else if (funcFParams.get(i) instanceof ArrayType && funcRParams.get(i) instanceof ArrayType) {
+							if (((ArrayType) funcFParams.get(i)).getDimension() != ((ArrayType) funcRParams.get(i)).getDimension()){
+								outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
+								return null;
+							}//维数不一样 报错
+						}else {
+							if (((ArrayType) funcFParams.get(i)).getDimension() != ((ArrayType) funcRParams.get(i)).getDimension()){
+								outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
+								return null;
+							}//类型不一样 报错
+						}
+					}
+				}else {
+					outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
+					return null;
+				}//数量不一样 报错
+			}
+			else if (!(funcFParams.isEmpty()&&funcRParams.isEmpty())){
+				outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
+				return null;
+			}
 
 		}
 		return null;

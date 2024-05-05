@@ -47,4 +47,7 @@ public class SymbolTableStack {
 		}
 		return lastVale;
 	}
+	public Type findFuncTy(String name){
+		return stack.get(0).find(name);
+	}
 }
