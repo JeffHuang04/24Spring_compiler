@@ -225,15 +225,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 					outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
 					return null;
 				}//数量不一样 报错
-			}
-			boolean is = !(funcFParamsExp.isEmpty()&&funcRParamsAct.isEmpty());
-			if (is){
-				int a = 1;
-			}
-//			else if (!(funcFParamsExp.isEmpty()&&funcRParamsAct.isEmpty())){
-//				outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
-//				return null;
-//			}
+			} else if (!(funcFParamsExp.isEmpty()&&funcRParamsAct.isEmpty())){
+				outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
+				return null;
+			}//funcRParams为空，触发空指针了
 
 
 
