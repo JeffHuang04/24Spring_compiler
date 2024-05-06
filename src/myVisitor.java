@@ -149,11 +149,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			Type returnTyExp = ((FunctionType) funcTy).getRetTy();
 			Type returnTyAct = calExpType(ctx.exp());
 			if (returnTyAct != null) {
-				if (returnTyAct instanceof ArrayType) {
-					if (((ArrayType) returnTyAct).getDimension() == 0) {
-						returnTyAct = new IntType();
-					}
-				}
 				if (returnTyAct instanceof IntType && returnTyExp instanceof IntType) {
 					return null;
 				} else {
@@ -166,16 +161,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			Type LValTy = calLValType(ctx.lVal());
 			Type expTy = calExpType(ctx.exp());
 			if (LValTy != null && expTy != null){
-				if (LValTy instanceof ArrayType){
-					if (((ArrayType) LValTy).getDimension() == 0){
-						LValTy = new IntType();
-					}
-				}
-				if (expTy instanceof ArrayType){
-					if (((ArrayType) expTy).getDimension() == 0){
-						expTy = new IntType();
-					}
-				}
 				if (LValTy instanceof IntType && expTy instanceof IntType){
 					return null;
 				} else if (LValTy instanceof ArrayType && expTy instanceof ArrayType) {
@@ -214,16 +199,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			Type condTy1 = calCond(ctx.cond(0));
 			Type condTy2 = calCond(ctx.cond(1));
 			if (condTy1!=null && condTy2!=null){
-				if (condTy1 instanceof ArrayType){
-					if (((ArrayType) condTy1).getDimension() == 0){
-						condTy1 = new IntType();
-					}
-				}
-				if (condTy2 instanceof ArrayType){
-					if (((ArrayType) condTy2).getDimension() == 0){
-						condTy2 = new IntType();
-					}
-				}
 				if (condTy1 instanceof IntType && condTy2 instanceof IntType){
 					return null;
 				}else {
@@ -267,11 +242,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			if (!funcFParamsExp.isEmpty() && !funcRParamsAct.isEmpty()){//两者均为非空
 				if (funcFParamsExp.size() == funcRParamsAct.size()){
 					for (int i = 0; i < funcFParamsExp.size();i++){
-						if (funcRParamsAct.get(i) instanceof ArrayType){
-							if ( ((ArrayType) funcRParamsAct.get(i)).getDimension() == 0){
-								funcRParamsAct.set(i,new IntType());
-							}
-						}
 						if (funcFParamsExp.get(i) instanceof IntType && funcRParamsAct.get(i) instanceof IntType){
 //
 						} else if (funcFParamsExp.get(i) instanceof ArrayType && funcRParamsAct.get(i) instanceof ArrayType) {
@@ -297,11 +267,6 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 
 		} else if (ctx.unaryOp() != null && !ctx.exp().isEmpty()) {
 			Type expTy = calExpType(ctx.exp(0));
-			if (expTy instanceof ArrayType){
-				if (((ArrayType) expTy).getDimension() == 0){
-					expTy = new IntType();
-				}
-			}
 			if (expTy instanceof IntType){
 				return expTy;
 			}else {
@@ -312,28 +277,9 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			Type expTy1 = calExpType(ctx.exp(0));
 			Type expTy2 = calExpType(ctx.exp(1));
 			if (expTy1!=null && expTy2!=null){//都为非空情况
-				if (expTy1 instanceof ArrayType){
-					if (((ArrayType) expTy1).getDimension() == 0){
-						expTy1 = new IntType();
-					}
-				}
-				if (expTy2 instanceof ArrayType){
-					if (((ArrayType) expTy2).getDimension() == 0){
-						expTy2 = new IntType();
-					}
-				}
 				if (expTy1 instanceof IntType && expTy2 instanceof IntType){
 					return new IntType();
-				}
-//				else if (expTy1 instanceof ArrayType && expTy2 instanceof ArrayType) {
-//					if (((ArrayType) expTy1).getDimension() == ((ArrayType) expTy2).getDimension()){
-//						return new ArrayType(new IntType(),((ArrayType) expTy1).getDimension());
-//					}else {
-//						outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_OPERANDS.getCode(), ctx.exp(0).getStart().getLine(),ErrorType.TYPE_MISMATCHED_OPERANDS.getMessage());
-//						return null;
-//					}
-//				}//只要不是Int都错
-				else {
+				} else {
 					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_OPERANDS.getCode(), ctx.exp(0).getStart().getLine(),ErrorType.TYPE_MISMATCHED_OPERANDS.getMessage());
 					return null;
 				}
@@ -363,8 +309,10 @@ public class myVisitor extends SysYParserBaseVisitor<Void>{
 			if (dimension < 0){
 				outputHelper.outputErr(ErrorType.NOT_AN_ARRAY.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.NOT_AN_ARRAY.getMessage());
 				return null;
-			}else {
-				return new ArrayType(new IntType(), ((ArrayType) LValTy).getDimension() - size);
+			} else if (dimension == 0) {
+				return new IntType();
+			} else {
+				return new ArrayType(new IntType(), dimension);
 			}
 		} else if (LValTy instanceof FunctionType) {
 			return LValTy;//不确定正确性
