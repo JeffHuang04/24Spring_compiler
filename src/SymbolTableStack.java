@@ -19,12 +19,15 @@ public class SymbolTableStack {
 		}
 	}
 	public void put(String name, Type type){
-		if (type instanceof FunctionType){
-			stack.get(0).addSymbol(name,type);
-		}else {
-			if (!stack.empty()) {
-				stack.peek().addSymbol(name, type);
-			}
+//		if (type instanceof FunctionType){
+//			stack.get(0).addSymbol(name,type);
+//		}else {
+//			if (!stack.empty()) {
+//				stack.peek().addSymbol(name, type);
+//			}
+//		}
+		if (!stack.empty()) {
+			stack.peek().addSymbol(name, type);
 		}
 	}
 	public Type findAll(String name){
