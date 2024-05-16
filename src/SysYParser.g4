@@ -9,7 +9,7 @@ program
    ;
 
 compUnit
-   : (funcDef | globalDecl=decl)+ EOF
+   : (funcDef | decl)+ EOF
    ;
 
 decl

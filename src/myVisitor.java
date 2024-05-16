@@ -37,6 +37,12 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 
 	@Override
 	public LLVMValueRef visitCompUnit(SysYParser.CompUnitContext ctx) {
-        return null;
+		SysYParser.DeclContext globalDecl = ctx.globalDecl;
+		return null;
+	}
+
+	@Override
+	public LLVMValueRef visitDecl(SysYParser.DeclContext ctx) {
+		return super.visitDecl(ctx);
 	}
 }
