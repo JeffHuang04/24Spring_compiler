@@ -1,322 +1,42 @@
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import java.util.ArrayList;
-import java.util.IllegalFormatCodePointException;
-import java.util.List;
-import java.util.Map;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.llvm.LLVM.LLVMBuilderRef;
+import org.bytedeco.llvm.LLVM.LLVMModuleRef;
+import org.bytedeco.llvm.LLVM.LLVMTypeRef;
+import org.bytedeco.llvm.LLVM.LLVMValueRef;
+import static org.bytedeco.llvm.global.LLVM.*;
 
-public class myVisitor extends SysYParserBaseVisitor<Void>{
-	private enum ErrorType{
-		UNDEFINED_VARIABLE(1, "Undefined variable"),
-		UNDEFINED_FUNCTION(2, "Undefined function"),
-		REDEFINED_VARIABLE(3, "Redefined variable"),
-		REDEFINED_FUNCTION(4, "Redefined function"),
-		TYPE_MISMATCHED_ASSIGNMENT(5, "Type mismatched for assignment"),
-		TYPE_MISMATCHED_OPERANDS(6, "Type mismatched for operands"),
-		TYPE_MISMATCHED_RETURN(7, "Type mismatched for return"),
-		FUNCTION_NOT_APPLICABLE(8, "Function is not applicable for arguments"),
-		NOT_AN_ARRAY(9, "Not an array"),
-		NOT_A_FUNCTION(10, "Not a function"),
-		ILLEGAL_ASSIGNMENT_TARGET(11, "The left-hand side of an assignment must be a variable");
 
-		private final int code;
-		private final String message;
-		ErrorType(int code, String message) {
-			this.code = code;
-			this.message = message;
-		}
-		public int getCode() {
-			return code;
-		}
-		public String getMessage() {
-			return message;
-		}
+public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
+	private static final LLVMModuleRef module = LLVMModuleCreateWithName("module");
+	LLVMBuilderRef builder = LLVMCreateBuilder();
+	LLVMTypeRef i32Type = LLVMInt32Type();
+
+	myVisitor(){
+		//初始化LLVM
+		LLVMInitializeCore(LLVMGetGlobalPassRegistry());
+		LLVMLinkInMCJIT();
+		LLVMInitializeNativeAsmPrinter();
+		LLVMInitializeNativeAsmParser();
+		LLVMInitializeNativeTarget();
 	}
-	private OutputHelper outputHelper;
-	public void setOutputHelper(OutputHelper outputHelper) {
-		this.outputHelper = outputHelper;
-	}
-	private SymbolTableStack symbolTableStack = new SymbolTableStack();
-
-	@Override
-	public Void visitBlock(SysYParser.BlockContext ctx) {
-		symbolTableStack.pushScope();//入栈
-		//添加形参到这个作用域中
-		visitChildren(ctx);
-		symbolTableStack.popScope();//出栈
-		return null;
+	public static LLVMModuleRef getModule(){
+		return module;
 	}
 
 	@Override
-	public Void visitFuncDef(SysYParser.FuncDefContext ctx) {
-		String funcName = ctx.IDENT().getText();
-		if (symbolTableStack.findNow(funcName) != null ){
-			outputHelper.outputErr(ErrorType.REDEFINED_FUNCTION.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.REDEFINED_FUNCTION.getMessage());
-			return null;//遇到该错误直接跳过该函数
-		}
-		String retTyToString = ctx.funcType().getText();
-		Type retTy = null;
-		if (retTyToString.equals("int")){
-			retTy = new IntType();
-		} else if (retTyToString.equals("void")) {
-			retTy = new VoidType();
-		}//一个函数的返回值retTy仅限于int类型，不包含array类型
-		ArrayList<Type> paramsType = new ArrayList<>();
-		symbolTableStack.pushScope();//建立函数参数作用域(空参数也要建立)
-		if (ctx.funcFParams() != null){
-			visit(ctx.funcFParams());
-			Map<String, Type> paramsTable = symbolTableStack.getNowTable();
-			paramsType.addAll(paramsTable.values());
-		}
-		Type funcType = new FunctionType(retTy,paramsType);
-		symbolTableStack.put(funcName,funcType);//如果是函数类型，直接在栈底push
-		visit(ctx.block());
-		symbolTableStack.popScope();//退出函数参数列表作用域
-		return null;
+	public LLVMValueRef visitTerminal(TerminalNode node) {
+        return null;
 	}
 
 	@Override
-	public Void visitFuncFParam(SysYParser.FuncFParamContext ctx) {
-		String funcFParamName = ctx.IDENT().getText();
-		if (symbolTableStack.findNow(funcFParamName) != null ){
-			outputHelper.outputErr(ErrorType.REDEFINED_VARIABLE.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.REDEFINED_VARIABLE.getMessage());
-            return null;//跳过重名参数
-		}
-		Type funcParamTy;
-		if (!ctx.L_BRACKT().isEmpty()){//表示是Array类型
-			funcParamTy = new ArrayType(new IntType(),ctx.L_BRACKT().size());
-		}else {//表示是Int类型
-			funcParamTy = new IntType();
-		}
-		symbolTableStack.put(funcFParamName,funcParamTy);
-		return null;
-	}
-	@Override
-	public Void visitConstDef(SysYParser.ConstDefContext ctx) {
-		String constDefName = ctx.IDENT().getText();
-		if (symbolTableStack.findNow(constDefName) != null ){
-			outputHelper.outputErr(ErrorType.REDEFINED_VARIABLE.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.REDEFINED_VARIABLE.getMessage());
-			return null;//跳过重名定义
-		}
-		Type constDefTy;
-		if (!ctx.L_BRACKT().isEmpty()){//表示是Array类型
-			constDefTy = new ArrayType(new IntType(),ctx.L_BRACKT().size());
-		}else {//表示是Int类型
-			visitConstInitVal(ctx.constInitVal());//暂未处理
-			constDefTy = new IntType();
-		}
-		symbolTableStack.put(constDefName,constDefTy);
-		return null;
-	}
-	@Override
-	public Void visitVarDef(SysYParser.VarDefContext ctx) {
-		String varDefName = ctx.IDENT().getText();
-		if (symbolTableStack.findNow(varDefName) != null ){
-			outputHelper.outputErr(ErrorType.REDEFINED_VARIABLE.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.REDEFINED_VARIABLE.getMessage());
-			return null;//跳过重名定义
-		}
-		Type varDefTy;
-		if (!ctx.L_BRACKT().isEmpty()){//表示是Array类型
-			varDefTy = new ArrayType(new IntType(),ctx.L_BRACKT().size());
-		}else {//表示是Int类型
-			if (ctx.ASSIGN() != null){//有定义语句 暂未处理
-				visitInitVal(ctx.initVal());
-			}
-			varDefTy = new IntType();
-		}
-		symbolTableStack.put(varDefName,varDefTy);
-		return null;
-	}
-	@Override
-	public Void visitInitVal(SysYParser.InitValContext ctx) {
-		return super.visitInitVal(ctx);
-	}
-	@Override
-	public Void visitConstInitVal(SysYParser.ConstInitValContext ctx) {
-		return super.visitConstInitVal(ctx);
+	public LLVMValueRef visitProgram(SysYParser.ProgramContext ctx) {
+        return null;
 	}
 
 	@Override
-	public Void visitLVal(SysYParser.LValContext ctx) {
-		calLValType(ctx);
-		return null;
-	}
-
-	@Override
-	public Void visitStmt(SysYParser.StmtContext ctx) {
-		if (ctx.RETURN() != null && ctx.exp()!=null){
-			Type funcTy = symbolTableStack.findNowFuncTy();
-			Type returnTyExp = ((FunctionType) funcTy).getRetTy();
-			Type returnTyAct = calExpType(ctx.exp());
-			if (returnTyAct != null) {
-				if (returnTyAct instanceof IntType && returnTyExp instanceof IntType) {
-					return null;
-				} else {
-					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_RETURN.getCode(), ctx.exp().getStart().getLine(), ErrorType.TYPE_MISMATCHED_RETURN.getMessage());
-					return null;
-				}
-			}
-			return null;
-		} else if (ctx.ASSIGN() != null) {
-			Type LValTy = calLValType(ctx.lVal());
-			Type expTy = calExpType(ctx.exp());
-			if (LValTy != null && expTy != null){
-				if (LValTy instanceof IntType && expTy instanceof IntType){
-					return null;
-				} else if (LValTy instanceof ArrayType && expTy instanceof ArrayType) {
-					if (((ArrayType) LValTy).getDimension() == ((ArrayType) expTy).getDimension()){
-						return null;
-					}else {
-						outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_ASSIGNMENT.getCode(),ctx.lVal().getStart().getLine(),ErrorType.TYPE_MISMATCHED_ASSIGNMENT.getMessage());
-						return null;
-					}
-				} else {
-					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_ASSIGNMENT.getCode(),ctx.lVal().getStart().getLine(),ErrorType.TYPE_MISMATCHED_ASSIGNMENT.getMessage());
-					return null;
-				}
-			}
-			return null;
-		}
-		return super.visitStmt(ctx);
-	}
-
-	@Override
-	public Void visitExp(SysYParser.ExpContext ctx) {
-		calExpType(ctx);
-		return null;
-	}
-
-	@Override
-	public Void visitCond(SysYParser.CondContext ctx) {
-		calCond(ctx);
-		return null;
-	}
-
-	public Type calCond(SysYParser.CondContext ctx){
-		if (ctx.exp() != null){
-			return calExpType(ctx.exp());
-		}else {
-			Type condTy1 = calCond(ctx.cond(0));
-			Type condTy2 = calCond(ctx.cond(1));
-			if (condTy1!=null && condTy2!=null){
-				if (condTy1 instanceof IntType && condTy2 instanceof IntType){
-					return null;
-				}else {
-					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_OPERANDS.getCode(), ctx.cond(0).getStart().getLine(),ErrorType.TYPE_MISMATCHED_OPERANDS.getMessage());
-					return null;
-				}
-			}
-			return null;
-		}
-	}
-
-	private Type calExpType(SysYParser.ExpContext ctx){
-		if (ctx.L_PAREN() != null && !ctx.exp().isEmpty()){
-			return calExpType(ctx.exp(0));
-		} else if (ctx.lVal() != null) {
-			return calLValType(ctx.lVal());
-		} else if (ctx.number() != null){
-			return new IntType();
-		} else if (ctx.IDENT() != null) {//代表的是函数
-			String funcName = ctx.IDENT().getText();
-			Type funcTy = symbolTableStack.findFuncTy(funcName);
-			ArrayList<Type> funcFParamsExp;
-			if (funcTy == null){//findAll不对,应该查找的是第一层的全局变量以及函数
-				outputHelper.outputErr(ErrorType.UNDEFINED_FUNCTION.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.UNDEFINED_FUNCTION.getMessage());
-				return null;
-			} else if (!(funcTy instanceof FunctionType)) {
-				outputHelper.outputErr(ErrorType.NOT_A_FUNCTION.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.NOT_A_FUNCTION.getMessage());
-				return null;//保证funcTy是函数类型的
-			}else {
-				funcFParamsExp =  ((FunctionType) funcTy).getParamsType();
-			}
-			ArrayList<Type> funcRParamsAct = new ArrayList<>();
-			if (ctx.funcRParams() != null){
-				for (int i = 0; i<ctx.funcRParams().param().size();i++){
-					Type tmp = calExpType(ctx.funcRParams().param(i).exp());
-					if (tmp != null){//确保非空才添加
-						funcRParamsAct.add(tmp);
-					}
-				}
-			}
-			if (!funcFParamsExp.isEmpty() && !funcRParamsAct.isEmpty()){//两者均为非空
-				if (funcFParamsExp.size() == funcRParamsAct.size()){
-					for (int i = 0; i < funcFParamsExp.size();i++){
-						if (funcFParamsExp.get(i) instanceof IntType && funcRParamsAct.get(i) instanceof IntType){
-//
-						} else if (funcFParamsExp.get(i) instanceof ArrayType && funcRParamsAct.get(i) instanceof ArrayType) {
-							if (((ArrayType) funcFParamsExp.get(i)).getDimension() != ((ArrayType) funcRParamsAct.get(i)).getDimension()){
-								outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
-								return null;
-							}//维数不一样 报错
-						}else {
-							outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
-							return null;//类型不一样 报错
-						}
-					}
-				}else {
-					outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.funcRParams().getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
-					return null;
-				}//数量不一样 报错
-			} else if (!(funcFParamsExp.isEmpty()&&funcRParamsAct.isEmpty())){
-				outputHelper.outputErr(ErrorType.FUNCTION_NOT_APPLICABLE.getCode(), ctx.getStart().getLine(),ErrorType.FUNCTION_NOT_APPLICABLE.getMessage());
-				return null;
-			}//funcRParams为空，触发空指针了
-			//至此，函数参数问题解决了
-			return ((FunctionType) funcTy).getRetTy();
-
-		} else if (ctx.unaryOp() != null && !ctx.exp().isEmpty()) {
-			Type expTy = calExpType(ctx.exp(0));
-			if (expTy instanceof IntType){
-				return expTy;
-			}else {
-				outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_OPERANDS.getCode(), ctx.exp(0).getStart().getLine(),ErrorType.TYPE_MISMATCHED_OPERANDS.getMessage());
-				return null;
-			}
-		} else {//两侧运算符
-			Type expTy1 = calExpType(ctx.exp(0));
-			Type expTy2 = calExpType(ctx.exp(1));
-			if (expTy1!=null && expTy2!=null){//都为非空情况
-				if (expTy1 instanceof IntType && expTy2 instanceof IntType){
-					return new IntType();
-				} else {
-					outputHelper.outputErr(ErrorType.TYPE_MISMATCHED_OPERANDS.getCode(), ctx.exp(0).getStart().getLine(),ErrorType.TYPE_MISMATCHED_OPERANDS.getMessage());
-					return null;
-				}
-			}
-			return null;
-		}
-	}
-	private Type calLValType(SysYParser.LValContext ctx){
-		String LValName = ctx.IDENT().getText();
-		Type LValTy = symbolTableStack.findAll(LValName);
-		if (LValTy == null){//左值没有函数使用
-			outputHelper.outputErr(ErrorType.UNDEFINED_VARIABLE.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.UNDEFINED_VARIABLE.getMessage());
-			return null;
-		} else if ((LValTy instanceof IntType|| LValTy instanceof FunctionType)
-				&& !ctx.L_BRACKT().isEmpty()) {
-			outputHelper.outputErr(ErrorType.NOT_AN_ARRAY.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.NOT_AN_ARRAY.getMessage());
-			return null;//对IntType或FuncType使用下标运算符
-		} else if (LValTy instanceof FunctionType && ctx.getParent() instanceof SysYParser.StmtContext && ctx.getParent().getChild(1).getText().equals("=")) {
-			outputHelper.outputErr(ErrorType.ILLEGAL_ASSIGNMENT_TARGET.getCode(),ctx.IDENT().getSymbol().getLine(),ErrorType.ILLEGAL_ASSIGNMENT_TARGET.getMessage());
-			return null;
-		}//赋值号左侧是函数名
-		if (LValTy instanceof IntType){
-			return new IntType();
-		} else if (LValTy instanceof ArrayType) {
-			int size = ctx.L_BRACKT().size();
-			int dimension = ((ArrayType) LValTy).getDimension()-size;
-			if (dimension < 0){
-				outputHelper.outputErr(ErrorType.NOT_AN_ARRAY.getCode(), ctx.IDENT().getSymbol().getLine(),ErrorType.NOT_AN_ARRAY.getMessage());
-				return null;
-			} else if (dimension == 0) {
-				return new IntType();
-			} else {
-				return new ArrayType(new IntType(), dimension);
-			}
-		} else if (LValTy instanceof FunctionType) {
-			return LValTy;//不确定正确性
-		}
-		return null;
+	public LLVMValueRef visitCompUnit(SysYParser.CompUnitContext ctx) {
+        return null;
 	}
 }
