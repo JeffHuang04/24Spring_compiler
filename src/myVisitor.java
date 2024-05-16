@@ -13,8 +13,8 @@ import static org.bytedeco.llvm.global.LLVM.*;
 public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	private static final LLVMModuleRef module = LLVMModuleCreateWithName("module");
 	LLVMBuilderRef builder = LLVMCreateBuilder();
-	LLVMTypeRef i32Type = LLVMInt32Type();
-
+	public LLVMTypeRef i32Type = LLVMInt32Type();
+	private SymbolTableStack symbolTableStack = new SymbolTableStack();
 	myVisitor(){
 		//初始化LLVM
 		LLVMInitializeCore(LLVMGetGlobalPassRegistry());
@@ -54,7 +54,8 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 
 	@Override
 	public LLVMValueRef visitBlock(SysYParser.BlockContext ctx) {
-
+		symbolTableStack.pushScope();
+		symbolTableStack.popScope();
 		return null;
 	}
 }
