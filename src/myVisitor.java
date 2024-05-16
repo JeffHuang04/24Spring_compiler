@@ -36,12 +36,21 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	}
 
 	@Override
-	public LLVMValueRef visitCompUnit(SysYParser.CompUnitContext ctx) {
-		return null;
+	public LLVMValueRef visitDecl(SysYParser.DeclContext ctx) {
+		String varDeclName = ctx.getText();
+		if (ctx.parent instanceof SysYParser.CompUnitContext){//全局变量
+			LLVMValueRef globalVar = LLVMAddGlobal(module, i32Type, /*globalVarName:String*/varDeclName);
+		}
+		return super.visitDecl(ctx);
 	}
 
 	@Override
-	public LLVMValueRef visitDecl(SysYParser.DeclContext ctx) {
-		return super.visitDecl(ctx);
+	public LLVMValueRef visitVarDef(SysYParser.VarDefContext ctx) {
+		return super.visitVarDef(ctx);
+	}
+
+	@Override
+	public LLVMValueRef visitConstDecl(SysYParser.ConstDeclContext ctx) {
+		return super.visitConstDecl(ctx);
 	}
 }
