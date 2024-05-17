@@ -7,7 +7,7 @@ target triple = "x86_64-pc-linux-gnu"
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
   store i32 0, i32* %1, align 4
-  ret i32 751
+  ret i32 4594
 }
 
 attributes #0 = { noinline nounwind optnone uwtable "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
