@@ -26,23 +26,59 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	@Override
 	public LLVMValueRef visitVarDef(SysYParser.VarDefContext ctx) {
 		String varName = ctx.IDENT().getText();
-		if (ctx.parent.parent.parent.parent instanceof SysYParser.CompUnitContext){//全局变量
+		if (ctx.parent.parent.parent instanceof SysYParser.CompUnitContext){//全局变量
 			if (ctx.initVal() != null && ctx.initVal().exp() != null) {
 				LLVMValueRef value = visitExp(ctx.initVal().exp());
 				LLVMValueRef Var = LLVMAddGlobal(module, i32Type, varName);
 				LLVMSetInitializer(Var, value);
-
-			}else {
+				IntType globalVar = new IntType();
+				symbolTableStack.put(varName,globalVar);
+			}else {//没有初始化
+				return null;
+			}
+		}else {
+			if (ctx.initVal() != null && ctx.initVal().exp() != null) {
+				LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, "pointer");
+				LLVMValueRef value = visitExp(ctx.initVal().exp());
+				LLVMBuildStore(builder, value, pointer);
+				//LLVMValueRef LoadValue = LLVMBuildLoad(builder, pointer, varName);
+				IntType scopeVar = new IntType();
+				scopeVar.pointer = pointer;
+				symbolTableStack.put(varName,scopeVar);
+			}else {//没有初始化
 				return null;
 			}
 		}
-		return super.visitVarDef(ctx);
+		return null;
 	}
 
 	@Override
 	public LLVMValueRef visitConstDef(SysYParser.ConstDefContext ctx) {
-
-		return super.visitConstDef(ctx);
+		String constVarName = ctx.IDENT().getText();
+		if (ctx.parent.parent.parent instanceof SysYParser.CompUnitContext){//全局变量
+			if (ctx.constInitVal() != null && ctx.constInitVal().constExp() != null) {
+				LLVMValueRef value = visitExp(ctx.constInitVal().constExp().exp());
+				LLVMValueRef Var = LLVMAddGlobal(module, i32Type, constVarName);
+				LLVMSetInitializer(Var, value);
+				IntType globalVar = new IntType();
+				symbolTableStack.put(constVarName,globalVar);
+			}else {
+				return null;
+			}
+		}else {
+			if (ctx.constInitVal() != null && ctx.constInitVal().constExp() != null) {
+				LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, "pointer");
+				LLVMValueRef value = visitExp(ctx.constInitVal().constExp().exp());
+				LLVMBuildStore(builder, value, pointer);
+				//LLVMValueRef LoadValue = LLVMBuildLoad(builder, pointer, constVarName);
+				IntType scopeVar = new IntType();
+				scopeVar.pointer = pointer;
+				symbolTableStack.put(constVarName,scopeVar);
+			}else {//没有初始化
+				return null;
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -124,9 +160,36 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 				LLVMBuildRet(builder, result);
 			}
 			return null;
+		} else if (ctx.lVal() != null) {
+			String varName = ctx.lVal().IDENT().getText();
+			Type varTy = symbolTableStack.findAll(varName);
+			LLVMValueRef pointer;
+			if (varTy instanceof IntType && ((IntType) varTy).pointer != null){
+				pointer = ((IntType) varTy).pointer;//默认lval是局部变量
+			}else {
+				return null;
+			}
+			LLVMValueRef value = visitExp(ctx.exp());
+			LLVMBuildStore(builder, value, pointer);
+			return null;
 		}
 		return super.visitStmt(ctx);
 	}
 
-
+	@Override
+	public LLVMValueRef visitLVal(SysYParser.LValContext ctx) {
+		String lValName = ctx.IDENT().getText();
+		Type lValTy = symbolTableStack.findAll(lValName);
+		if (lValTy instanceof IntType){
+			if (((IntType) lValTy).pointer == null){
+				LLVMValueRef globalVarRef = LLVMGetNamedGlobal(module,lValName);
+				return LLVMBuildLoad(builder,globalVarRef,"pointer");
+			}else {
+				LLVMValueRef pointer = ((IntType) lValTy).pointer;
+				return LLVMBuildLoad(builder, pointer, "pointer");
+			}
+		}else {//默认无其他属性
+			return null;
+		}
+	}
 }
