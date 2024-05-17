@@ -66,7 +66,13 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 		}else if (ctx.lVal()!=null){
 			return visitLVal(ctx.lVal());
 		}else if (ctx.number()!=null){
-			return LLVMConstInt(i32Type, Integer.parseInt(ctx.number().getText()), /* signExtend */ 0);
+			if (ctx.number().getText().startsWith("0x")||ctx.number().getText().startsWith("0X")){
+				return LLVMConstInt(i32Type, Integer.parseInt(ctx.number().getText().substring(2),16), /* signExtend */ 0);
+			} else if (ctx.number().getText().startsWith("0")&&ctx.number().getText().length()!=1) {
+				return LLVMConstInt(i32Type, Integer.parseInt(ctx.number().getText().substring(1),16), /* signExtend */ 0);
+			}else {
+				return LLVMConstInt(i32Type, Integer.parseInt(ctx.number().getText()), /* signExtend */ 0);
+			}
 		} else if (ctx.unaryOp()!=null) {
 			if (Objects.equals(ctx.unaryOp().getText(), "-")){
 				LLVMValueRef zero = LLVMConstInt(i32Type, 0, /* signExtend */ 0);
