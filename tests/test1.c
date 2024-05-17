@@ -1,5 +1,6 @@
-int g_var = 2;
-int main() {
-    int a = 1;
-    return a + g_var;
+int a = 10;
+int main(){
+    a = a - 3;
+    int b = a + 1;
+    return b+a*2;
 }
