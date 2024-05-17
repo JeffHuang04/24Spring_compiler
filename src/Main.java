@@ -26,10 +26,10 @@ public class Main
         ParseTree tree = sysYParser.program();
         myVisitor visitor = new myVisitor();
         visitor.visit(tree);
-        throw new Exception(tree.getText());
-//        if (LLVMPrintModuleToFile(myVisitor.getModule(), output, error) != 0) {    // module是你自定义的LLVMModuleRef对象
-//            LLVMDisposeMessage(error);
-//        }
+//        throw new Exception(tree.getText());
+        if (LLVMPrintModuleToFile(myVisitor.getModule(), output, error) != 0) {    // module是你自定义的LLVMModuleRef对象
+            LLVMDisposeMessage(error);
+        }
 
     }
 }
