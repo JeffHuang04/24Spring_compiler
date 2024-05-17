@@ -81,9 +81,9 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			} else if (Objects.equals(ctx.unaryOp().getText(), "!")) {
 				LLVMValueRef right = visitExp(ctx.exp(0));
 				LLVMValueRef zero = LLVMConstInt(i32Type, 0, /* signExtend */ 0);
-				LLVMValueRef one = LLVMConstInt(i32Type, 1, /* signExtend */ 0);
+				//LLVMValueRef one = LLVMConstInt(i32Type, 1, /* signExtend */ 0);
 				LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, right, zero, "condition = n == 0");
-				LLVMValueRef xor = LLVMBuildXor(builder, condition, one, "xor");
+				LLVMValueRef xor = LLVMBuildXor(builder, condition, LLVMConstInt(LLVMInt1Type(), 1, 0), "xor");
 				return LLVMBuildZExt(builder, xor, i32Type, "zext");
 			} else {
 				return visitExp(ctx.exp(0));
