@@ -75,9 +75,10 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			}
 		} else if (ctx.unaryOp()!=null) {
 			if (Objects.equals(ctx.unaryOp().getText(), "-")){
-				LLVMValueRef zero = LLVMConstInt(i32Type, 0, /* signExtend */ 0);
+				//LLVMValueRef zero = LLVMConstInt(i32Type, 0, /* signExtend */ 0);
 				LLVMValueRef right = visitExp(ctx.exp(0));
-				return LLVMBuildSub(builder,zero,right,"minus");
+				return LLVMBuildNeg(builder,right,"Neg");
+				//return LLVMBuildSub(builder,zero,right,"minus");
 			} else if (Objects.equals(ctx.unaryOp().getText(), "!")) {
 				LLVMValueRef right = visitExp(ctx.exp(0));
 				LLVMValueRef zero = LLVMConstInt(i32Type, 0, /* signExtend */ 0);
