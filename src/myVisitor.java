@@ -1,13 +1,6 @@
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.javacpp.PointerPointer;
-import org.bytedeco.llvm.LLVM.LLVMBuilderRef;
-import org.bytedeco.llvm.LLVM.LLVMModuleRef;
-import org.bytedeco.llvm.LLVM.LLVMTypeRef;
-import org.bytedeco.llvm.LLVM.LLVMValueRef;
+import org.bytedeco.llvm.LLVM.*;
 import static org.bytedeco.llvm.global.LLVM.*;
+
 
 
 public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
@@ -48,6 +41,9 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 		LLVMTypeRef returnType = i32Type;
 		LLVMTypeRef ft = LLVMFunctionType(returnType, (LLVMTypeRef) null, 0, 0);//默认只有main且main无参数
 		LLVMValueRef function = LLVMAddFunction(module, funcName, ft);
+		//通过如下语句在函数中加入基本块，一个函数可以加入多个基本块
+		LLVMBasicBlockRef main = LLVMAppendBasicBlock(function,funcName+"Entry");
+		LLVMPositionBuilderAtEnd(builder, main);
 		visit(ctx.block());
 		return null;
 	}
@@ -55,6 +51,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	@Override
 	public LLVMValueRef visitBlock(SysYParser.BlockContext ctx) {
 		symbolTableStack.pushScope();
+		visitChildren(ctx);
 		symbolTableStack.popScope();
 		return null;
 	}
