@@ -1,4 +1,7 @@
 import org.bytedeco.llvm.LLVM.*;
+
+import java.util.Objects;
+
 import static org.bytedeco.llvm.global.LLVM.*;
 
 
@@ -22,10 +25,10 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 
 	@Override
 	public LLVMValueRef visitVarDef(SysYParser.VarDefContext ctx) {
-		String varName = ctx.IDENT().getText();
-		if (ctx.parent.parent.parent.parent instanceof SysYParser.CompUnitContext){//全局变量
-
-		}
+//		String varName = ctx.IDENT().getText();
+//		if (ctx.parent.parent.parent.parent instanceof SysYParser.CompUnitContext){//全局变量
+//
+//		}
 		return super.visitVarDef(ctx);
 	}
 
@@ -64,7 +67,31 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			return visitLVal(ctx.lVal());
 		}else if (ctx.number()!=null){
 			return LLVMConstInt(i32Type, Integer.parseInt(ctx.number().getText()), /* signExtend */ 0);
+		} else if (ctx.unaryOp()!=null) {
+			if (Objects.equals(ctx.unaryOp().getText(), "-")){
+				LLVMValueRef right = visitExp(ctx.exp(0));
+				return LLVMBuildNeg(builder,right,"neg");
+			} else if (Objects.equals(ctx.unaryOp().getText(), "!")) {
+				LLVMValueRef right = visitExp(ctx.exp(0));
+				LLVMValueRef zero = LLVMConstInt(i32Type, 0, /* signExtend */ 0);
+				LLVMValueRef one = LLVMConstInt(i32Type, 1, /* signExtend */ 0);
+				LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, right, zero, "condition = n == 0");
+				LLVMValueRef xor = LLVMBuildXor(builder, condition, one, "xor");
+				return LLVMBuildZExt(builder, xor, i32Type, "zext");
+			}
 		}
 		return null;
+	}
+
+	@Override
+	public LLVMValueRef visitStmt(SysYParser.StmtContext ctx) {
+		if (ctx.RETURN() != null){
+			if (ctx.exp()!=null){
+				LLVMValueRef result = visitExp(ctx.exp());
+				LLVMBuildRet(builder, result);
+			}
+			return null;
+		}
+		return super.visitStmt(ctx);
 	}
 }
