@@ -164,8 +164,12 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			String varName = ctx.lVal().IDENT().getText();
 			Type varTy = symbolTableStack.findAll(varName);
 			LLVMValueRef pointer;
-			if (varTy instanceof IntType && ((IntType) varTy).pointer != null){
-				pointer = ((IntType) varTy).pointer;//默认lval是局部变量
+			if (varTy instanceof IntType ){
+				if (((IntType) varTy).pointer != null) {
+					pointer = ((IntType) varTy).pointer;
+				}else {
+					pointer = LLVMGetNamedGlobal(module,varName);//全局变量可以被修改!!
+				}
 			}else {
 				return null;
 			}
