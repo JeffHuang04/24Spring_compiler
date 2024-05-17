@@ -79,6 +79,8 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 				LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, right, zero, "condition = n == 0");
 				LLVMValueRef xor = LLVMBuildXor(builder, condition, one, "xor");
 				return LLVMBuildZExt(builder, xor, i32Type, "zext");
+			} else {
+				return visitExp(ctx.exp(0));
 			}
 		} else if (ctx.IDENT() == null){
 			LLVMValueRef left = visit(ctx.exp(0));

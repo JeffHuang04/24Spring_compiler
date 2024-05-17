@@ -1,3 +1,3 @@
-int fuck() {
-    return -2;
+int main() {
+    return -+751;
 }
