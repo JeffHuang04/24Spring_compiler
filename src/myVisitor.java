@@ -79,6 +79,22 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 				LLVMValueRef xor = LLVMBuildXor(builder, condition, one, "xor");
 				return LLVMBuildZExt(builder, xor, i32Type, "zext");
 			}
+		} else if (ctx.IDENT() == null){
+			LLVMValueRef left = visit(ctx.exp(0));
+			LLVMValueRef right = visit(ctx.exp(1));
+			if (ctx.MUL() != null){
+				return LLVMBuildMul(builder,left,right,"mul");
+			} else if (ctx.DIV() != null) {
+				return LLVMBuildSDiv(builder,left,right,"div");
+			} else if (ctx.MOD() != null) {
+				return LLVMBuildSRem(builder,left,right,"mod");
+			} else if (ctx.PLUS() != null) {
+				return LLVMBuildAdd(builder,left,right,"add");
+			} else if (ctx.MINUS() != null) {
+				return LLVMBuildSub(builder,left,right,"minus");
+			}else {
+				return null;
+			}
 		}
 		return null;
 	}
@@ -94,4 +110,6 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 		}
 		return super.visitStmt(ctx);
 	}
+
+
 }
