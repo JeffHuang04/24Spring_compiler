@@ -3,6 +3,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import java.io.IOException;
+import java.rmi.server.ExportException;
+
 import org.bytedeco.javacpp.BytePointer;
 
 import static org.bytedeco.llvm.global.LLVM.LLVMDisposeMessage;
@@ -11,7 +13,7 @@ import static org.bytedeco.llvm.global.LLVM.LLVMPrintModuleToFile;
 public class Main
 {
     public static final BytePointer error = new BytePointer();
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         if (args.length < 2) {
             System.err.println("input path is required");
         }
@@ -24,9 +26,10 @@ public class Main
         ParseTree tree = sysYParser.program();
         myVisitor visitor = new myVisitor();
         visitor.visit(tree);
-        if (LLVMPrintModuleToFile(myVisitor.getModule(), output, error) != 0) {    // module是你自定义的LLVMModuleRef对象
-            LLVMDisposeMessage(error);
-        }
+        throw new Exception(tree.getText());
+//        if (LLVMPrintModuleToFile(myVisitor.getModule(), output, error) != 0) {    // module是你自定义的LLVMModuleRef对象
+//            LLVMDisposeMessage(error);
+//        }
 
     }
 }
