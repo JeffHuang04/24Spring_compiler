@@ -55,4 +55,16 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 		symbolTableStack.popScope();
 		return null;
 	}
+
+	@Override
+	public LLVMValueRef visitExp(SysYParser.ExpContext ctx) {
+		if (ctx.L_PAREN()!=null && ctx.R_PAREN()!=null && ctx.IDENT() == null){
+			return visitExp(ctx.exp(0));
+		}else if (ctx.lVal()!=null){
+			return visitLVal(ctx.lVal());
+		}else if (ctx.number()!=null){
+			return LLVMConstInt(i32Type, Integer.parseInt(ctx.number().getText()), /* signExtend */ 0);
+		}
+		return null;
+	}
 }
