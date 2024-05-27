@@ -1,7 +1,8 @@
-int b(int i){
-    i = 0;
+int f(int i){
     return i;
 }
-int c(int i){
-    return i;
+
+int main(){
+    int a = 1;
+    return f(a);
 }
