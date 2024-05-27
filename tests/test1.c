@@ -1,6 +1,7 @@
-int a = 10;
-int main(){
-    a = a - 3;
-    int b = a + 1;
-    return b+a*2;
+int b(int i){
+    i = 0;
+    return i;
+}
+int c(int i){
+    return i;
 }

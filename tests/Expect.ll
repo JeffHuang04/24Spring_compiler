@@ -3,24 +3,21 @@ source_filename = "tests/test1.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
-@a = dso_local global i32 10, align 4
+; Function Attrs: noinline nounwind optnone uwtable
+define dso_local i32 @b(i32 noundef %0) #0 {
+  %2 = alloca i32, align 4
+  store i32 %0, i32* %2, align 4
+  store i32 0, i32* %2, align 4
+  %3 = load i32, i32* %2, align 4
+  ret i32 %3
+}
 
 ; Function Attrs: noinline nounwind optnone uwtable
-define dso_local i32 @main() #0 {
-  %1 = alloca i32, align 4
+define dso_local i32 @c(i32 noundef %0) #0 {
   %2 = alloca i32, align 4
-  store i32 0, i32* %1, align 4
-  %3 = load i32, i32* @a, align 4
-  %4 = sub nsw i32 %3, 3
-  store i32 %4, i32* @a, align 4
-  %5 = load i32, i32* @a, align 4
-  %6 = add nsw i32 %5, 1
-  store i32 %6, i32* %2, align 4
-  %7 = load i32, i32* %2, align 4
-  %8 = load i32, i32* @a, align 4
-  %9 = mul nsw i32 %8, 2
-  %10 = add nsw i32 %7, %9
-  ret i32 %10
+  store i32 %0, i32* %2, align 4
+  %3 = load i32, i32* %2, align 4
+  ret i32 %3
 }
 
 attributes #0 = { noinline nounwind optnone uwtable "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }

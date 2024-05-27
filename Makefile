@@ -42,3 +42,6 @@ clean:
 submit: clean
 	git gc
 	bash submit.sh
+
+genIr:
+	clang -S -emit-llvm tests/test1.c -o tests/Expect.ll -O0
