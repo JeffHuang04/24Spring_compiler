@@ -12,4 +12,6 @@
 /out
 /.idea
 /Lab.iml/out
-/tests
+/tests/test1.c
+/tests/Actual.ll
+/tests/Expect.ll
