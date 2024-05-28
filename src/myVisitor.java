@@ -11,6 +11,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	private static final LLVMModuleRef module = LLVMModuleCreateWithName("module");
 	LLVMBuilderRef builder = LLVMCreateBuilder();
 	public LLVMTypeRef i32Type = LLVMInt32Type();
+	public LLVMTypeRef voidType = LLVMVoidType();
 	private SymbolTableStack symbolTableStack = new SymbolTableStack();
 	myVisitor(){
 		//初始化LLVM
@@ -87,7 +88,12 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	@Override
 	public LLVMValueRef visitFuncDef(SysYParser.FuncDefContext ctx) {
 		String funcName = ctx.IDENT().getText();
-		LLVMTypeRef returnType = i32Type;
+		LLVMTypeRef returnType;
+		if (ctx.funcType().getText().equals("void")){
+			returnType = voidType;
+		}else {
+			returnType = i32Type;
+		}
 		int funcFParamNum = 0;
 		if (ctx.funcFParams() != null){
 			funcFParamNum = ctx.funcFParams().funcFParam().size();
@@ -97,7 +103,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 		for (int i = 0; i<funcFParamNum; i++){
 			argumentTypes.put(i,i32Type);//默认函数的形参只有int类型
 		}
-		LLVMTypeRef ft = LLVMFunctionType(returnType, argumentTypes, funcFParamNum, 0);//默认只有main且main无参数
+		LLVMTypeRef ft = LLVMFunctionType(returnType, argumentTypes, funcFParamNum, 0);
 		LLVMValueRef function = LLVMAddFunction(module, funcName, ft);
 		LLVMBasicBlockRef fucBlock = LLVMAppendBasicBlock(function,funcName+"Entry");
 		LLVMPositionBuilderAtEnd(builder, fucBlock);
