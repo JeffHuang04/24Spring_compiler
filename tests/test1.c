@@ -1,9 +1,11 @@
-void a(){
+int f(int i){
+    return i;
+}
+void m(){
     return;
 }
 int main(){
-    int c=0;
-    int count=0;
-    return 0;
+    int a = 1;
+    m();
+    return f(f(a)+a)+a;
 }
-

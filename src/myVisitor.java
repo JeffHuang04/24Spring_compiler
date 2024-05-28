@@ -12,6 +12,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	LLVMBuilderRef builder = LLVMCreateBuilder();
 	public LLVMTypeRef i32Type = LLVMInt32Type();
 	public LLVMTypeRef voidType = LLVMVoidType();
+	boolean haveReturn;
 	private SymbolTableStack symbolTableStack = new SymbolTableStack();
 	myVisitor(){
 		//初始化LLVM
@@ -115,7 +116,11 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			funcFParam.pointer = pointer;
 			symbolTableStack.put(name,funcFParam);
 		}
+		haveReturn = false;
 		visit(ctx.block());
+		if (returnType.equals(voidType) && !haveReturn){
+			LLVMBuildRet(builder,null);
+		}
 		symbolTableStack.popScope();//弹出形参作用域
 		return null;
 	}
@@ -193,6 +198,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	@Override
 	public LLVMValueRef visitStmt(SysYParser.StmtContext ctx) {
 		if (ctx.RETURN() != null){
+			haveReturn = true;
 			if (ctx.exp()!=null){
 				LLVMValueRef result = visitExp(ctx.exp());
 				LLVMBuildRet(builder, result);
