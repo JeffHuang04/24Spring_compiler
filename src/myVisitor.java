@@ -36,7 +36,8 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			}
 		}else {
 			if (ctx.initVal() != null && ctx.initVal().exp() != null) {
-				LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, "pointer");
+				String name = ctx.IDENT().getText();
+				LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, name);
 				LLVMValueRef value = visitExp(ctx.initVal().exp());
 				LLVMBuildStore(builder, value, pointer);
 				//LLVMValueRef LoadValue = LLVMBuildLoad(builder, pointer, varName);
@@ -65,7 +66,8 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			}
 		}else {
 			if (ctx.constInitVal() != null && ctx.constInitVal().constExp() != null) {
-				LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, "pointer");
+				String name = ctx.IDENT().getText();
+				LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, name);
 				LLVMValueRef value = visitExp(ctx.constInitVal().constExp().exp());
 				LLVMBuildStore(builder, value, pointer);
 				//LLVMValueRef LoadValue = LLVMBuildLoad(builder, pointer, constVarName);
@@ -130,7 +132,19 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			}else {
 				return LLVMConstInt(i32Type, Integer.parseInt(ctx.number().getText()), /* signExtend */ 0);
 			}
-		} else if (ctx.unaryOp()!=null) {
+		}else if(ctx.IDENT() != null && ctx.L_PAREN() != null && ctx.R_PAREN() != null){//函数调用
+			String funcName = ctx.IDENT().getText();
+			LLVMValueRef func = LLVMGetNamedFunction(module,funcName);
+			int funcRParamNum = 0;
+			if (ctx.funcRParams() != null){
+				funcRParamNum = ctx.funcRParams().param().size();
+			}
+			PointerPointer<Pointer> argumentTypes = new PointerPointer<>(funcRParamNum);
+			for (int i = 0; i < funcRParamNum;i++){
+				argumentTypes.put(i,visitExp(ctx.funcRParams().param().get(i).exp()));
+			}
+			return LLVMBuildCall(builder,func,argumentTypes,funcRParamNum,funcName);
+		}else if (ctx.unaryOp()!=null) {
 			if (Objects.equals(ctx.unaryOp().getText(), "-")){
 				//LLVMValueRef zero = LLVMConstInt(i32Type, 0, /* signExtend */ 0);
 				LLVMValueRef right = visitExp(ctx.exp(0));
@@ -180,7 +194,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			LLVMValueRef pointer;
 			if (varTy instanceof IntType){//将形参赋给局部变量，之后将形参当作局部变量来处理
 				if (((IntType) varTy).isFuncFParam && ((IntType) varTy).pointer == null){
-					LLVMValueRef pointerParam = LLVMBuildAlloca(builder, i32Type,"pointer");
+					LLVMValueRef pointerParam = LLVMBuildAlloca(builder, i32Type,varName);
 					LLVMBuildStore(builder, ((IntType) varTy).FuncFParamPointer, pointerParam);
 					((IntType) varTy).pointer = pointerParam;
 				}
@@ -209,7 +223,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 		Type lValTy = symbolTableStack.findAll(lValName);
 		if (lValTy instanceof IntType){//将形参赋给局部变量，之后将形参当作局部变量来处理
 			if (((IntType) lValTy).isFuncFParam && ((IntType) lValTy).pointer == null){
-				LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type,"pointer");
+				LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type,lValName);
 				LLVMBuildStore(builder, ((IntType) lValTy).FuncFParamPointer, pointer);
 				((IntType) lValTy).pointer = pointer;
 			}
@@ -219,10 +233,10 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 		if (lValTy instanceof IntType){
 			if (((IntType) lValTy).pointer == null){
 				LLVMValueRef globalVarRef = LLVMGetNamedGlobal(module,lValName);
-				return LLVMBuildLoad(builder,globalVarRef,"pointer");
+				return LLVMBuildLoad(builder,globalVarRef,lValName);
 			}else {
 				LLVMValueRef pointer = ((IntType) lValTy).pointer;
-				return LLVMBuildLoad(builder, pointer, "pointer");
+				return LLVMBuildLoad(builder, pointer, lValName);
 			}
 		}else {//默认无其他属性
 			return null;
