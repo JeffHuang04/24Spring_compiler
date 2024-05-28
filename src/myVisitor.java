@@ -1,6 +1,9 @@
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.llvm.LLVM.*;
+
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
 import static org.bytedeco.llvm.global.LLVM.*;
 
@@ -96,15 +99,20 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 		}
 		LLVMTypeRef ft = LLVMFunctionType(returnType, argumentTypes, funcFParamNum, 0);//默认只有main且main无参数
 		LLVMValueRef function = LLVMAddFunction(module, funcName, ft);
+		LLVMBasicBlockRef fucBlock = LLVMAppendBasicBlock(function,funcName+"Entry");
+		LLVMPositionBuilderAtEnd(builder, fucBlock);
+		ArrayList<LLVMValueRef> paramPointers = new ArrayList<>(funcFParamNum);
 		for (int i = 0; i<funcFParamNum; i++){
 			String name = ctx.funcFParams().funcFParam().get(i).IDENT().getText();
 			IntType funcFParam = new IntType();//默认函数的形参只有int类型
-			funcFParam.isFuncFParam = true;
-			funcFParam.FuncFParamPointer = LLVMGetParam(function,i);
+			LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, name);
+			funcFParam.pointer = pointer;
+			paramPointers.add(pointer);
 			symbolTableStack.put(name,funcFParam);
 		}
-		LLVMBasicBlockRef fucBlock = LLVMAppendBasicBlock(function,funcName+"Entry");
-		LLVMPositionBuilderAtEnd(builder, fucBlock);
+		for (int i = 0; i < funcFParamNum;i++){
+			LLVMBuildStore(builder, LLVMGetParam(function,i), paramPointers.get(i));
+		}
 		visit(ctx.block());
 		symbolTableStack.popScope();//弹出形参作用域
 		return null;
@@ -192,15 +200,15 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			String varName = ctx.lVal().IDENT().getText();
 			Type varTy = symbolTableStack.findAll(varName);
 			LLVMValueRef pointer;
-			if (varTy instanceof IntType){//将形参赋给局部变量，之后将形参当作局部变量来处理
-				if (((IntType) varTy).isFuncFParam && ((IntType) varTy).pointer == null){
-					LLVMValueRef pointerParam = LLVMBuildAlloca(builder, i32Type,varName);
-					LLVMBuildStore(builder, ((IntType) varTy).FuncFParamPointer, pointerParam);
-					((IntType) varTy).pointer = pointerParam;
-				}
-			}else {
-				return null;
-			}
+//			if (varTy instanceof IntType){//将形参赋给局部变量，之后将形参当作局部变量来处理
+//				if (((IntType) varTy).isFuncFParam && ((IntType) varTy).pointer == null){
+//					LLVMValueRef pointerParam = LLVMBuildAlloca(builder, i32Type,varName);
+//					LLVMBuildStore(builder, ((IntType) varTy).FuncFParamPointer, pointerParam);
+//					((IntType) varTy).pointer = pointerParam;
+//				}
+//			}else {
+//				return null;
+//			}
 			if (varTy instanceof IntType ){
 				if (((IntType) varTy).pointer != null) {
 					pointer = ((IntType) varTy).pointer;
@@ -221,15 +229,15 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	public LLVMValueRef visitLVal(SysYParser.LValContext ctx) {
 		String lValName = ctx.IDENT().getText();
 		Type lValTy = symbolTableStack.findAll(lValName);
-		if (lValTy instanceof IntType){//将形参赋给局部变量，之后将形参当作局部变量来处理
-			if (((IntType) lValTy).isFuncFParam && ((IntType) lValTy).pointer == null){
-				LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type,lValName);
-				LLVMBuildStore(builder, ((IntType) lValTy).FuncFParamPointer, pointer);
-				((IntType) lValTy).pointer = pointer;
-			}
-		}else {
-			return null;
-		}
+//		if (lValTy instanceof IntType){//将形参赋给局部变量，之后将形参当作局部变量来处理
+//			if (((IntType) lValTy).isFuncFParam && ((IntType) lValTy).pointer == null){
+//				LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type,lValName);
+//				LLVMBuildStore(builder, ((IntType) lValTy).FuncFParamPointer, pointer);
+//				((IntType) lValTy).pointer = pointer;
+//			}
+//		}else {
+//			return null;
+//		}
 		if (lValTy instanceof IntType){
 			if (((IntType) lValTy).pointer == null){
 				LLVMValueRef globalVarRef = LLVMGetNamedGlobal(module,lValName);
