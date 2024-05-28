@@ -36,8 +36,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			IntType globalVar = new IntType();
 			symbolTableStack.put(varName,globalVar);
 		}else {
-			String name = ctx.IDENT().getText();
-			LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, name);
+			LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, varName);
 			if (ctx.initVal() != null && ctx.initVal().exp() != null) {
 				LLVMValueRef value = visitExp(ctx.initVal().exp());
 				LLVMBuildStore(builder, value, pointer);
@@ -89,9 +88,9 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			returnType = i32Type;
 		}
 		int funcFParamNum = 0;
+		symbolTableStack.pushScope();//给形参添加作用域
 		if (ctx.funcFParams() != null){
 			funcFParamNum = ctx.funcFParams().funcFParam().size();
-			symbolTableStack.pushScope();//给形参添加作用域
 		}
 		PointerPointer<Pointer> argumentTypes = new PointerPointer<>(funcFParamNum);
 		for (int i = 0; i<funcFParamNum; i++){
