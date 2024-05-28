@@ -6,6 +6,6 @@ void m(){
 int main(){
     int a = 1;
     int c = b;
-    //m();
+    m();
     return 0;
 }

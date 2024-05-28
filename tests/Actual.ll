@@ -4,6 +4,11 @@ source_filename = "module"
 @a = external global i32
 @b = global i32 1
 
+define void @m() {
+mEntry:
+  ret void
+}
+
 define i32 @main() {
 mainEntry:
   %a = alloca i32, align 4
