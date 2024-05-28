@@ -107,17 +107,13 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 		LLVMValueRef function = LLVMAddFunction(module, funcName, ft);
 		LLVMBasicBlockRef fucBlock = LLVMAppendBasicBlock(function,funcName+"Entry");
 		LLVMPositionBuilderAtEnd(builder, fucBlock);
-		ArrayList<LLVMValueRef> paramPointers = new ArrayList<>(funcFParamNum);
 		for (int i = 0; i<funcFParamNum; i++){
 			String name = ctx.funcFParams().funcFParam().get(i).IDENT().getText();
 			IntType funcFParam = new IntType();//默认函数的形参只有int类型
 			LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, name);
+			LLVMBuildStore(builder, LLVMGetParam(function,i), pointer);
 			funcFParam.pointer = pointer;
-			paramPointers.add(pointer);
 			symbolTableStack.put(name,funcFParam);
-		}
-		for (int i = 0; i < funcFParamNum;i++){
-			LLVMBuildStore(builder, LLVMGetParam(function,i), paramPointers.get(i));
 		}
 		visit(ctx.block());
 		symbolTableStack.popScope();//弹出形参作用域
