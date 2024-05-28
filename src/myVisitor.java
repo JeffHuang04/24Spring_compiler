@@ -53,23 +53,28 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	public LLVMValueRef visitConstDef(SysYParser.ConstDefContext ctx) {
 		String constVarName = ctx.IDENT().getText();
 		if (ctx.parent.parent.parent instanceof SysYParser.CompUnitContext){//全局变量
-			LLVMValueRef Var = LLVMAddGlobal(module, i32Type, constVarName);
 			if (ctx.constInitVal() != null && ctx.constInitVal().constExp() != null) {
 				LLVMValueRef value = visitExp(ctx.constInitVal().constExp().exp());
+				LLVMValueRef Var = LLVMAddGlobal(module, i32Type, constVarName);
 				LLVMSetInitializer(Var, value);
+				IntType globalVar = new IntType();
+				symbolTableStack.put(constVarName,globalVar);
+			}else {
+				return null;
 			}
-			IntType globalVar = new IntType();
-			symbolTableStack.put(constVarName,globalVar);
 		}else {
-			String name = ctx.IDENT().getText();
-			LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, name);
 			if (ctx.constInitVal() != null && ctx.constInitVal().constExp() != null) {
+				String name = ctx.IDENT().getText();
+				LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, name);
 				LLVMValueRef value = visitExp(ctx.constInitVal().constExp().exp());
 				LLVMBuildStore(builder, value, pointer);
+				//LLVMValueRef LoadValue = LLVMBuildLoad(builder, pointer, constVarName);
+				IntType scopeVar = new IntType();
+				scopeVar.pointer = pointer;
+				symbolTableStack.put(constVarName,scopeVar);
+			}else {//没有初始化
+				return null;
 			}
-			IntType scopeVar = new IntType();
-			scopeVar.pointer = pointer;
-			symbolTableStack.put(constVarName,scopeVar);
 		}
 		return null;
 	}
