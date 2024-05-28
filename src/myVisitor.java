@@ -10,6 +10,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	LLVMBuilderRef builder = LLVMCreateBuilder();
 	public LLVMTypeRef i32Type = LLVMInt32Type();
 	public LLVMTypeRef voidType = LLVMVoidType();
+	LLVMValueRef zero = LLVMConstInt(i32Type, 0, 0);
 	boolean hasReturn;
 	private SymbolTableStack symbolTableStack = new SymbolTableStack();
 	myVisitor(){
@@ -27,24 +28,26 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	@Override
 	public LLVMValueRef visitVarDef(SysYParser.VarDefContext ctx) {
 		String varName = ctx.IDENT().getText();
-//		if (ctx.parent.parent.parent instanceof SysYParser.CompUnitContext){//全局变量
-//			LLVMValueRef Var = LLVMAddGlobal(module, i32Type, varName);
-//			if (ctx.initVal() != null && ctx.initVal().exp() != null) {
-//				LLVMValueRef value = visitExp(ctx.initVal().exp());
-//				LLVMSetInitializer(Var, value);
-//			}
-//			IntType globalVar = new IntType();
-//			symbolTableStack.put(varName,globalVar);
 		if (ctx.parent.parent.parent instanceof SysYParser.CompUnitContext){//全局变量
+			LLVMValueRef Var = LLVMAddGlobal(module, i32Type, varName);
 			if (ctx.initVal() != null && ctx.initVal().exp() != null) {
 				LLVMValueRef value = visitExp(ctx.initVal().exp());
-				LLVMValueRef Var = LLVMAddGlobal(module, i32Type, varName);
 				LLVMSetInitializer(Var, value);
-				IntType globalVar = new IntType();
-				symbolTableStack.put(varName,globalVar);
-			}else {//没有初始化
-				return null;
+			}else {
+				LLVMSetInitializer(Var,zero);
 			}
+			IntType globalVar = new IntType();
+			symbolTableStack.put(varName,globalVar);
+//		if (ctx.parent.parent.parent instanceof SysYParser.CompUnitContext){//全局变量
+//			if (ctx.initVal() != null && ctx.initVal().exp() != null) {
+//				LLVMValueRef value = visitExp(ctx.initVal().exp());
+//				LLVMValueRef Var = LLVMAddGlobal(module, i32Type, varName);
+//				LLVMSetInitializer(Var, value);
+//				IntType globalVar = new IntType();
+//				symbolTableStack.put(varName,globalVar);
+//			}else {//没有初始化
+//				return null;
+//			}
 		}else {
 			LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, varName);
 			if (ctx.initVal() != null && ctx.initVal().exp() != null) {
