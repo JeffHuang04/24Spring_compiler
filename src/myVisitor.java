@@ -38,18 +38,15 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 				return null;
 			}
 		}else {
+			String name = ctx.IDENT().getText();
+			LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, name);
 			if (ctx.initVal() != null && ctx.initVal().exp() != null) {
-				String name = ctx.IDENT().getText();
-				LLVMValueRef pointer = LLVMBuildAlloca(builder, i32Type, name);
 				LLVMValueRef value = visitExp(ctx.initVal().exp());
 				LLVMBuildStore(builder, value, pointer);
-				//LLVMValueRef LoadValue = LLVMBuildLoad(builder, pointer, varName);
-				IntType scopeVar = new IntType();
-				scopeVar.pointer = pointer;
-				symbolTableStack.put(varName,scopeVar);
-			}else {//没有初始化
-				return null;
 			}
+			IntType scopeVar = new IntType();
+			scopeVar.pointer = pointer;
+			symbolTableStack.put(varName,scopeVar);
 		}
 		return null;
 	}
