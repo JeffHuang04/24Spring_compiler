@@ -1,9 +1,8 @@
-int f(int i,int a){
+int main(){
+    int a=0;
+    int count=0;
     return 0;
 }
-
-int main(){
-    int a = 1;
-    int i = 5;
-    return f(a,i);
+void a(){
+    return;
 }
