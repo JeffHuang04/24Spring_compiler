@@ -2,8 +2,6 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.llvm.LLVM.*;
 
-import java.util.ArrayList;
-import java.util.Map;
 import java.util.Objects;
 import static org.bytedeco.llvm.global.LLVM.*;
 
@@ -12,7 +10,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	LLVMBuilderRef builder = LLVMCreateBuilder();
 	public LLVMTypeRef i32Type = LLVMInt32Type();
 	public LLVMTypeRef voidType = LLVMVoidType();
-	boolean haveReturn;
+	boolean hasReturn;
 	private SymbolTableStack symbolTableStack = new SymbolTableStack();
 	myVisitor(){
 		//初始化LLVM
@@ -116,9 +114,9 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			funcFParam.pointer = pointer;
 			symbolTableStack.put(name,funcFParam);
 		}
-		haveReturn = false;
+		hasReturn = false;
 		visit(ctx.block());
-		if (returnType.equals(voidType) && !haveReturn){
+		if (returnType.equals(voidType) && !hasReturn){
 			LLVMBuildRet(builder,null);
 		}
 		symbolTableStack.popScope();//弹出形参作用域
@@ -158,7 +156,12 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			for (int i = 0; i < funcRParamNum;i++){
 				argumentTypes.put(i,visitExp(ctx.funcRParams().param().get(i).exp()));
 			}
-			return LLVMBuildCall(builder,func,argumentTypes,funcRParamNum,funcName);
+			LLVMTypeRef returnType = LLVMGetReturnType(LLVMGetElementType(LLVMTypeOf(func)));
+			if (returnType.equals(voidType)){
+				return LLVMBuildCall(builder,func,argumentTypes,funcRParamNum,"");
+			}else {
+				return LLVMBuildCall(builder, func, argumentTypes, funcRParamNum, funcName);
+			}
 		}else if (ctx.unaryOp()!=null) {
 			if (Objects.equals(ctx.unaryOp().getText(), "-")){
 				//LLVMValueRef zero = LLVMConstInt(i32Type, 0, /* signExtend */ 0);
@@ -198,7 +201,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	@Override
 	public LLVMValueRef visitStmt(SysYParser.StmtContext ctx) {
 		if (ctx.RETURN() != null){
-			haveReturn = true;
+			hasReturn = true;
 			if (ctx.exp()!=null){
 				LLVMValueRef result = visitExp(ctx.exp());
 				LLVMBuildRet(builder, result);
