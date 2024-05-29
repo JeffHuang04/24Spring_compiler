@@ -318,8 +318,8 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 				LLVMBuildCondBr(builder,rightI1,result,result);
 				LLVMPositionBuilderAtEnd(builder,result);
 				LLVMValueRef phiNode = LLVMBuildPhi(builder, LLVMInt1Type(), "andPhi");
-				LLVMAddIncoming(phiNode, new PointerPointer<>(leftI1), new PointerPointer<>(leftBlock), 1);
-				LLVMAddIncoming(phiNode, new PointerPointer<>(rightI1), new PointerPointer<>(rightBlock), 1);
+				LLVMAddIncoming(phiNode, new PointerPointer<>(left), new PointerPointer<>(leftBlock), 1);
+				LLVMAddIncoming(phiNode, new PointerPointer<>(right), new PointerPointer<>(rightBlock), 1);
 				return LLVMBuildZExt(builder,phiNode,i32Type,"AND");
 //				LLVMValueRef andi1 = LLVMBuildAnd(builder, left, right, "AND");
 //				return LLVMBuildZExt(builder,andi1,i32Type,"AND");
@@ -335,8 +335,8 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 				LLVMBuildCondBr(builder,rightI1,result,result);
 				LLVMPositionBuilderAtEnd(builder,result);
 				LLVMValueRef phiNode = LLVMBuildPhi(builder, LLVMInt1Type(), "orPhi");
-				LLVMAddIncoming(phiNode, new PointerPointer<>(leftI1), new PointerPointer<>(leftBlock), 1);
-				LLVMAddIncoming(phiNode, new PointerPointer<>(rightI1), new PointerPointer<>(rightBlock), 1);
+				LLVMAddIncoming(phiNode, new PointerPointer<>(left), new PointerPointer<>(leftBlock), 1);
+				LLVMAddIncoming(phiNode, new PointerPointer<>(right), new PointerPointer<>(rightBlock), 1);
 				return LLVMBuildZExt(builder,phiNode,i32Type,"OR");
 //				LLVMValueRef ori1 = LLVMBuildOr(builder, left, right, "OR");
 //				return LLVMBuildZExt(builder,ori1,i32Type,"OR");
