@@ -14,6 +14,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	LLVMValueRef currentFunc;
 	boolean hasReturn;
 	private SymbolTableStack symbolTableStack = new SymbolTableStack();
+	private WhileStack whileStack = new WhileStack();
 	myVisitor(){
 		//初始化LLVM
 		LLVMInitializeCore(LLVMGetGlobalPassRegistry());
@@ -234,6 +235,30 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			}
 			LLVMBuildBr(builder,nextBlock);
 			LLVMPositionBuilderAtEnd(builder, nextBlock);
+			return null;
+		}else if (ctx.WHILE()!=null){
+			LLVMBasicBlockRef whileCondBlock = LLVMAppendBasicBlock(currentFunc, "while_cond");
+			LLVMBasicBlockRef whileBodyBlock = LLVMAppendBasicBlock(currentFunc, "while_body");
+			LLVMBasicBlockRef whileEndBlock = LLVMAppendBasicBlock(currentFunc, "while_end");
+			whileStack.pushTable(whileCondBlock,whileEndBlock);
+			LLVMBuildBr(builder,whileCondBlock);
+			LLVMPositionBuilderAtEnd(builder, whileCondBlock);
+			LLVMValueRef condI32 = visitCond(ctx.cond());
+			LLVMValueRef condI1 =  LLVMBuildICmp(builder, LLVMIntNE, condI32, zero, "cond");
+			LLVMBuildCondBr(builder,condI1,whileBodyBlock,whileEndBlock);
+			LLVMPositionBuilderAtEnd(builder, whileBodyBlock);
+			visitStmt(ctx.stmt(0));
+			LLVMBuildBr(builder,whileCondBlock);
+			LLVMPositionBuilderAtEnd(builder, whileEndBlock);
+			whileStack.popTable();
+			return null;
+		}else if (ctx.BREAK()!=null){
+			WhileTable currentWhileTable = whileStack.peekTable();
+			LLVMBuildBr(builder,currentWhileTable.whileEndBlock);
+			return null;
+		} else if (ctx.CONTINUE() != null) {
+			WhileTable currentWhileTable = whileStack.peekTable();
+			LLVMBuildBr(builder,currentWhileTable.whileCondBlock);
 			return null;
 		}
 		return super.visitStmt(ctx);
