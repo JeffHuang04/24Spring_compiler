@@ -13,8 +13,6 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	LLVMValueRef zero = LLVMConstInt(i32Type, 0, 0);
 	LLVMValueRef currentFunc;
 	boolean hasReturn;
-	LLVMValueRef LLVMTRUE = LLVMConstInt(LLVMInt1Type(), 1, 0);
-	LLVMValueRef LLVMFALSE = LLVMConstInt(LLVMInt1Type(), 0, 0);
 	private SymbolTableStack symbolTableStack = new SymbolTableStack();
 	private WhileStack whileStack = new WhileStack();
 	myVisitor(){
@@ -330,18 +328,13 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 				LLVMPositionBuilderAtEnd(builder, result);
 				LLVMValueRef phiNode = LLVMBuildPhi(builder, LLVMInt1Type(), "Phi");
 				LLVMValueRef[] Values = new LLVMValueRef[]{leftI1, rightI1};;
-//				if (ctx.AND()!=null){
-//					Values = new LLVMValueRef[]{LLVMFALSE, rightI1};
-//				}else {
-//					Values = new LLVMValueRef[]{LLVMTRUE, rightI1};
-//				}
 				LLVMBasicBlockRef[] Blocks = new LLVMBasicBlockRef[]{leftBlock, rightBlock};
 				LLVMAddIncoming(phiNode, new PointerPointer<>(Values), new PointerPointer<>(Blocks), 2);
-				return LLVMBuildZExt(builder, phiNode, i32Type, "ANDOR");
-//				LLVMValueRef andi1 = LLVMBuildAnd(builder, left, right, "AND");
-//				return LLVMBuildZExt(builder,andi1,i32Type,"AND");
-// 				LLVMValueRef ori1 = LLVMBuildOr(builder, left, right, "OR");
-//				return LLVMBuildZExt(builder,ori1,i32Type,"OR");
+				if (ctx.AND() != null) {
+					return LLVMBuildZExt(builder, phiNode, i32Type, "AND");
+				}else {
+					return LLVMBuildZExt(builder, phiNode, i32Type, "OR");
+				}
 			}
 		}
 		return null;
