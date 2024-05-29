@@ -1,11 +1,10 @@
-int a;
-int b = 1;
-void m(){
-    return;
-}
-int main(){
-    int a = 1;
-    int c = b;
-    m();
-    return 0;
+int a = 10;
+int main() {
+    if (a != 10) {
+        a = 2;
+    }
+    else {
+        a = 20;
+    }
+    return a;
 }

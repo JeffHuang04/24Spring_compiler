@@ -11,6 +11,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 	public LLVMTypeRef i32Type = LLVMInt32Type();
 	public LLVMTypeRef voidType = LLVMVoidType();
 	LLVMValueRef zero = LLVMConstInt(i32Type, 0, 0);
+	LLVMValueRef currentFunc;
 	boolean hasReturn;
 	private SymbolTableStack symbolTableStack = new SymbolTableStack();
 	myVisitor(){
@@ -99,6 +100,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 		LLVMValueRef function = LLVMAddFunction(module, funcName, ft);
 		LLVMBasicBlockRef fucBlock = LLVMAppendBasicBlock(function,funcName+"Entry");
 		LLVMPositionBuilderAtEnd(builder, fucBlock);
+		currentFunc = function;
 		for (int i = 0; i<funcFParamNum; i++){
 			String name = ctx.funcFParams().funcFParam().get(i).IDENT().getText();
 			IntType funcFParam = new IntType();//默认函数的形参只有int类型
@@ -157,14 +159,11 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			}
 		}else if (ctx.unaryOp()!=null) {
 			if (Objects.equals(ctx.unaryOp().getText(), "-")){
-				//LLVMValueRef zero = LLVMConstInt(i32Type, 0, /* signExtend */ 0);
 				LLVMValueRef right = visitExp(ctx.exp(0));
 				return LLVMBuildNeg(builder,right,"Neg");
-				//return LLVMBuildSub(builder,zero,right,"minus");
 			} else if (Objects.equals(ctx.unaryOp().getText(), "!")) {
 				LLVMValueRef right = visitExp(ctx.exp(0));
 				LLVMValueRef zero = LLVMConstInt(i32Type, 0, /* signExtend */ 0);
-				//LLVMValueRef one = LLVMConstInt(i32Type, 1, /* signExtend */ 0);
 				LLVMValueRef condition = LLVMBuildICmp(builder, LLVMIntNE, right, zero, "condition = n == 0");
 				LLVMValueRef xor = LLVMBuildXor(builder, condition, LLVMConstInt(LLVMInt1Type(), 1, 0), "xor");
 				return LLVMBuildZExt(builder, xor, i32Type, "zext");
@@ -219,6 +218,23 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 			LLVMValueRef value = visitExp(ctx.exp());
 			LLVMBuildStore(builder, value, pointer);
 			return null;
+		} else if (ctx.IF() != null){
+			LLVMValueRef condI32 = visitCond(ctx.cond());
+			LLVMValueRef condI1 =  LLVMBuildICmp(builder, LLVMIntNE, condI32, zero, "cond");
+			LLVMBasicBlockRef ifTrueBlock = LLVMAppendBasicBlock(currentFunc, "if_true");
+			LLVMBasicBlockRef ifFalseBlock = LLVMAppendBasicBlock(currentFunc, "if_false");
+			LLVMBasicBlockRef nextBlock = LLVMAppendBasicBlock(currentFunc, "next");
+			LLVMBuildCondBr(builder,condI1,ifTrueBlock,ifFalseBlock);
+			LLVMPositionBuilderAtEnd(builder, ifTrueBlock);
+			visitStmt(ctx.stmt(0));
+			LLVMBuildBr(builder,nextBlock);
+			LLVMPositionBuilderAtEnd(builder, ifFalseBlock);
+			if (ctx.ELSE() != null){
+				visitStmt(ctx.stmt(1));
+			}
+			LLVMBuildBr(builder,nextBlock);
+			LLVMPositionBuilderAtEnd(builder, nextBlock);
+			return null;
 		}
 		return super.visitStmt(ctx);
 	}
@@ -238,5 +254,41 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 		}else {//默认无其他属性
 			return null;
 		}
+	}
+
+	@Override
+	public LLVMValueRef visitCond(SysYParser.CondContext ctx) {
+		if (ctx.exp()!=null){
+			return visitExp(ctx.exp());
+		}else {
+			LLVMValueRef left = visitCond(ctx.cond(0));
+			LLVMValueRef right = visitCond(ctx.cond(1));
+			if (ctx.LT()!=null){
+				LLVMValueRef cmpi1 = LLVMBuildICmp(builder,LLVMIntSLT,left,right,"LT");
+				return LLVMBuildZExt(builder,cmpi1,i32Type,"LT");
+			} else if (ctx.GT() != null) {
+				LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntSGT, left, right, "GT");
+				return LLVMBuildZExt(builder,cmpI1,i32Type,"GT");
+			} else if (ctx.LE() != null) {
+				LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntSLE, left, right, "LE");
+				return LLVMBuildZExt(builder,cmpI1,i32Type,"LE");
+			} else if (ctx.GE() != null) {
+				LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntSGE, left, right, "GE");
+				return LLVMBuildZExt(builder,cmpI1,i32Type,"GE");
+			} else if (ctx.EQ() != null) {
+				LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntEQ, left, right, "EQ");
+				return LLVMBuildZExt(builder,cmpI1,i32Type,"EQ");
+			} else if (ctx.NEQ() != null) {
+				LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntNE, left, right, "NEQ");
+				return LLVMBuildZExt(builder,cmpI1,i32Type,"NEQ");
+			} else if (ctx.AND() != null){//未实现短路求值
+				LLVMValueRef andi1 = LLVMBuildAnd(builder, left, right, "AND");
+				return LLVMBuildZExt(builder,andi1,i32Type,"AND");
+			} else if (ctx.OR() != null) {//未实现短路求值
+				LLVMValueRef ori1 = LLVMBuildOr(builder, left, right, "OR");
+				return LLVMBuildZExt(builder,ori1,i32Type,"OR");
+			}
+		}
+		return null;
 	}
 }
