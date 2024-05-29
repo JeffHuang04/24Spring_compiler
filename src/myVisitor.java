@@ -310,7 +310,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 				LLVMBasicBlockRef leftBlock = LLVMAppendBasicBlock(currentFunc, "left");
 				LLVMBasicBlockRef rightBlock = LLVMAppendBasicBlock(currentFunc, "right");
 				LLVMBasicBlockRef result = LLVMAppendBasicBlock(currentFunc, "result");
-				LLVMPositionBuilderAtEnd(builder,leftBlock);
+				//LLVMPositionBuilderAtEnd(builder,leftBlock);
 				LLVMValueRef leftI1 =  LLVMBuildICmp(builder, LLVMIntNE, left, zero, "cond");
 				LLVMBuildCondBr(builder,leftI1,rightBlock,result);
 				LLVMPositionBuilderAtEnd(builder,rightBlock);
@@ -335,7 +335,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 				LLVMBasicBlockRef leftBlock = LLVMAppendBasicBlock(currentFunc, "left");
 				LLVMBasicBlockRef rightBlock = LLVMAppendBasicBlock(currentFunc, "right");
 				LLVMBasicBlockRef result = LLVMAppendBasicBlock(currentFunc, "result");
-				LLVMPositionBuilderAtEnd(builder,leftBlock);
+				//LLVMPositionBuilderAtEnd(builder,leftBlock);
 				LLVMValueRef leftI1 =  LLVMBuildICmp(builder, LLVMIntNE, left, zero, "cond");
 				LLVMBuildCondBr(builder,leftI1,result,rightBlock);
 				LLVMPositionBuilderAtEnd(builder,rightBlock);
