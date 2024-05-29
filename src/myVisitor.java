@@ -314,6 +314,7 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 				LLVMBasicBlockRef leftBlock = LLVMAppendBasicBlock(currentFunc, "left");
 				LLVMBasicBlockRef rightBlock = LLVMAppendBasicBlock(currentFunc, "right");
 				LLVMBasicBlockRef result = LLVMAppendBasicBlock(currentFunc, "result");
+				LLVMBuildBr(builder,leftBlock);
 				LLVMPositionBuilderAtEnd(builder, leftBlock);
 				LLVMValueRef left = visitCond(ctx.cond(0));
 				LLVMValueRef leftI1 = LLVMBuildICmp(builder, LLVMIntNE, left, zero, "cond");

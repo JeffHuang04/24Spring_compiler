@@ -20,11 +20,11 @@ right:                                            ; preds = %left
   %GT4 = icmp sgt i32 %count3, 0
   %GT5 = zext i1 %GT4 to i32
   %cond6 = icmp ne i32 %GT5, 0
-  br i1 %cond6, label %result, label %result
+  br label %result
 
-result:                                           ; preds = %right, %right, %left
-  %andPhi = phi i1 [ %cond, %left ], [ %cond6, %right ]
-  %ANDOR = zext i1 %andPhi to i32
+result:                                           ; preds = %right, %left
+  %Phi = phi i1 [ true, %left ], [ %cond6, %right ]
+  %ANDOR = zext i1 %Phi to i32
   %cond7 = icmp ne i32 %ANDOR, 0
   br i1 %cond7, label %if_true, label %if_false
 
