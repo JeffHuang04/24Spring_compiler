@@ -13,16 +13,16 @@ mainEntry:
   %count3 = load i32, i32* %count, align 4
   %GT4 = icmp sgt i32 %count3, 0
   %GT5 = zext i1 %GT4 to i32
-
-left:                                             ; No predecessors!
   %cond = icmp ne i32 %GT2, 0
   br i1 %cond, label %result, label %right
 
-right:                                            ; preds = %left
+left:                                             ; No predecessors!
+
+right:                                            ; preds = %mainEntry
   %cond6 = icmp ne i32 %GT5, 0
   br i1 %cond6, label %result, label %result
 
-result:                                           ; preds = %right, %right, %left
+result:                                           ; preds = %right, %right, %mainEntry
   %orPhi = phi i1 [ %right, <null operand!> ], [ <null operand!>, <null operand!> ]
   %OR = zext i1 %orPhi to i32
   %cond7 = icmp ne i32 %OR, 0

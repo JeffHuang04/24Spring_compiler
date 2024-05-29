@@ -286,34 +286,38 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 		if (ctx.exp()!=null){
 			return visitExp(ctx.exp());
 		}else {
-			LLVMValueRef left = visitCond(ctx.cond(0));
-			LLVMValueRef right = visitCond(ctx.cond(1));
-			if (ctx.LT()!=null){
-				LLVMValueRef cmpi1 = LLVMBuildICmp(builder,LLVMIntSLT,left,right,"LT");
-				return LLVMBuildZExt(builder,cmpi1,i32Type,"LT");
-			} else if (ctx.GT() != null) {
-				LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntSGT, left, right, "GT");
-				return LLVMBuildZExt(builder,cmpI1,i32Type,"GT");
-			} else if (ctx.LE() != null) {
-				LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntSLE, left, right, "LE");
-				return LLVMBuildZExt(builder,cmpI1,i32Type,"LE");
-			} else if (ctx.GE() != null) {
-				LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntSGE, left, right, "GE");
-				return LLVMBuildZExt(builder,cmpI1,i32Type,"GE");
-			} else if (ctx.EQ() != null) {
-				LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntEQ, left, right, "EQ");
-				return LLVMBuildZExt(builder,cmpI1,i32Type,"EQ");
-			} else if (ctx.NEQ() != null) {
-				LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntNE, left, right, "NEQ");
-				return LLVMBuildZExt(builder,cmpI1,i32Type,"NEQ");
+			if (ctx.OR() == null && ctx.AND() == null) {
+				LLVMValueRef left = visitCond(ctx.cond(0));
+				LLVMValueRef right = visitCond(ctx.cond(1));
+				if (ctx.LT() != null) {
+					LLVMValueRef cmpi1 = LLVMBuildICmp(builder, LLVMIntSLT, left, right, "LT");
+					return LLVMBuildZExt(builder, cmpi1, i32Type, "LT");
+				} else if (ctx.GT() != null) {
+					LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntSGT, left, right, "GT");
+					return LLVMBuildZExt(builder, cmpI1, i32Type, "GT");
+				} else if (ctx.LE() != null) {
+					LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntSLE, left, right, "LE");
+					return LLVMBuildZExt(builder, cmpI1, i32Type, "LE");
+				} else if (ctx.GE() != null) {
+					LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntSGE, left, right, "GE");
+					return LLVMBuildZExt(builder, cmpI1, i32Type, "GE");
+				} else if (ctx.EQ() != null) {
+					LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntEQ, left, right, "EQ");
+					return LLVMBuildZExt(builder, cmpI1, i32Type, "EQ");
+				} else if (ctx.NEQ() != null) {
+					LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntNE, left, right, "NEQ");
+					return LLVMBuildZExt(builder, cmpI1, i32Type, "NEQ");
+				}
 			} else if (ctx.AND() != null){//短路求值phi方法借助chatgpt
 				LLVMBasicBlockRef leftBlock = LLVMAppendBasicBlock(currentFunc, "left");
 				LLVMBasicBlockRef rightBlock = LLVMAppendBasicBlock(currentFunc, "right");
 				LLVMBasicBlockRef result = LLVMAppendBasicBlock(currentFunc, "result");
-				//LLVMPositionBuilderAtEnd(builder,leftBlock);
+				LLVMPositionBuilderAtEnd(builder,leftBlock);
+				LLVMValueRef left = visitCond(ctx.cond(0));
 				LLVMValueRef leftI1 =  LLVMBuildICmp(builder, LLVMIntNE, left, zero, "cond");
 				LLVMBuildCondBr(builder,leftI1,rightBlock,result);
 				LLVMPositionBuilderAtEnd(builder,rightBlock);
+				LLVMValueRef right = visitCond(ctx.cond(1));
 				LLVMValueRef rightI1 =  LLVMBuildICmp(builder, LLVMIntNE, right, zero, "cond");
 				LLVMBuildCondBr(builder,rightI1,result,result);
 				LLVMPositionBuilderAtEnd(builder,result);
@@ -335,10 +339,12 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 				LLVMBasicBlockRef leftBlock = LLVMAppendBasicBlock(currentFunc, "left");
 				LLVMBasicBlockRef rightBlock = LLVMAppendBasicBlock(currentFunc, "right");
 				LLVMBasicBlockRef result = LLVMAppendBasicBlock(currentFunc, "result");
-				//LLVMPositionBuilderAtEnd(builder,leftBlock);
+				LLVMPositionBuilderAtEnd(builder,leftBlock);
+				LLVMValueRef left = visitCond(ctx.cond(0));
 				LLVMValueRef leftI1 =  LLVMBuildICmp(builder, LLVMIntNE, left, zero, "cond");
 				LLVMBuildCondBr(builder,leftI1,result,rightBlock);
 				LLVMPositionBuilderAtEnd(builder,rightBlock);
+				LLVMValueRef right = visitCond(ctx.cond(1));
 				LLVMValueRef rightI1 =  LLVMBuildICmp(builder, LLVMIntNE, right, zero, "cond");
 				LLVMBuildCondBr(builder,rightI1,result,result);
 				LLVMPositionBuilderAtEnd(builder,result);
