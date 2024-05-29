@@ -308,59 +308,31 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 					LLVMValueRef cmpI1 = LLVMBuildICmp(builder, LLVMIntNE, left, right, "NEQ");
 					return LLVMBuildZExt(builder, cmpI1, i32Type, "NEQ");
 				}
-			} else if (ctx.AND() != null){//短路求值phi方法借助chatgpt
+			} else {//短路求值phi方法借助chatgpt
 				LLVMBasicBlockRef leftBlock = LLVMAppendBasicBlock(currentFunc, "left");
 				LLVMBasicBlockRef rightBlock = LLVMAppendBasicBlock(currentFunc, "right");
 				LLVMBasicBlockRef result = LLVMAppendBasicBlock(currentFunc, "result");
-				LLVMPositionBuilderAtEnd(builder,leftBlock);
+				LLVMPositionBuilderAtEnd(builder, leftBlock);
 				LLVMValueRef left = visitCond(ctx.cond(0));
-				LLVMValueRef leftI1 =  LLVMBuildICmp(builder, LLVMIntNE, left, zero, "cond");
-				LLVMBuildCondBr(builder,leftI1,rightBlock,result);
-				LLVMPositionBuilderAtEnd(builder,rightBlock);
+				LLVMValueRef leftI1 = LLVMBuildICmp(builder, LLVMIntNE, left, zero, "cond");
+				if (ctx.AND() != null) {
+					LLVMBuildCondBr(builder, leftI1, rightBlock, result);
+				}else {
+					LLVMBuildCondBr(builder, leftI1, result, rightBlock);
+				}
+				LLVMPositionBuilderAtEnd(builder, rightBlock);
 				LLVMValueRef right = visitCond(ctx.cond(1));
-				LLVMValueRef rightI1 =  LLVMBuildICmp(builder, LLVMIntNE, right, zero, "cond");
-				LLVMBuildCondBr(builder,rightI1,result,result);
-				LLVMPositionBuilderAtEnd(builder,result);
+				LLVMValueRef rightI1 = LLVMBuildICmp(builder, LLVMIntNE, right, zero, "cond");
+				LLVMBuildCondBr(builder, rightI1, result, result);
+				LLVMPositionBuilderAtEnd(builder, result);
 				LLVMValueRef phiNode = LLVMBuildPhi(builder, LLVMInt1Type(), "andPhi");
-				PointerPointer<Pointer> valueLeft = new PointerPointer<>(1);
-				valueLeft.put(0,leftI1);
-				PointerPointer<Pointer> blockLeft = new PointerPointer<>(1);
-				valueLeft.put(0,leftBlock);
-				PointerPointer<Pointer> valueRight = new PointerPointer<>(1);
-				valueLeft.put(0,rightI1);
-				PointerPointer<Pointer> blockRight = new PointerPointer<>(1);
-				valueLeft.put(0,rightBlock);
-				LLVMAddIncoming(phiNode, valueLeft, blockLeft, 1);
-				LLVMAddIncoming(phiNode, valueRight, blockRight, 1);
-				return LLVMBuildZExt(builder,phiNode,i32Type,"AND");
+				LLVMValueRef[] Values = new LLVMValueRef[]{leftI1, rightI1};
+				LLVMBasicBlockRef[] Blocks = new LLVMBasicBlockRef[]{leftBlock, rightBlock};
+				LLVMAddIncoming(phiNode, new PointerPointer<>(Values), new PointerPointer<>(Blocks), 2);
+				return LLVMBuildZExt(builder, phiNode, i32Type, "ANDOR");
 //				LLVMValueRef andi1 = LLVMBuildAnd(builder, left, right, "AND");
 //				return LLVMBuildZExt(builder,andi1,i32Type,"AND");
-			} else if (ctx.OR() != null) {//短路求值phi方法借助chatgpt
-				LLVMBasicBlockRef leftBlock = LLVMAppendBasicBlock(currentFunc, "left");
-				LLVMBasicBlockRef rightBlock = LLVMAppendBasicBlock(currentFunc, "right");
-				LLVMBasicBlockRef result = LLVMAppendBasicBlock(currentFunc, "result");
-				LLVMPositionBuilderAtEnd(builder,leftBlock);
-				LLVMValueRef left = visitCond(ctx.cond(0));
-				LLVMValueRef leftI1 =  LLVMBuildICmp(builder, LLVMIntNE, left, zero, "cond");
-				LLVMBuildCondBr(builder,leftI1,result,rightBlock);
-				LLVMPositionBuilderAtEnd(builder,rightBlock);
-				LLVMValueRef right = visitCond(ctx.cond(1));
-				LLVMValueRef rightI1 =  LLVMBuildICmp(builder, LLVMIntNE, right, zero, "cond");
-				LLVMBuildCondBr(builder,rightI1,result,result);
-				LLVMPositionBuilderAtEnd(builder,result);
-				LLVMValueRef phiNode = LLVMBuildPhi(builder, LLVMInt1Type(), "orPhi");
-				PointerPointer<Pointer> valueLeft = new PointerPointer<>(1);
-				valueLeft.put(0,leftI1);
-				PointerPointer<Pointer> blockLeft = new PointerPointer<>(1);
-				valueLeft.put(0,leftBlock);
-				PointerPointer<Pointer> valueRight = new PointerPointer<>(1);
-				valueLeft.put(0,rightI1);
-				PointerPointer<Pointer> blockRight = new PointerPointer<>(1);
-				valueLeft.put(0,rightBlock);
-				LLVMAddIncoming(phiNode, valueLeft, blockLeft, 1);
-				LLVMAddIncoming(phiNode, valueRight, blockRight, 1);
-				return LLVMBuildZExt(builder,phiNode,i32Type,"OR");
-//				LLVMValueRef ori1 = LLVMBuildOr(builder, left, right, "OR");
+// 				LLVMValueRef ori1 = LLVMBuildOr(builder, left, right, "OR");
 //				return LLVMBuildZExt(builder,ori1,i32Type,"OR");
 			}
 		}
