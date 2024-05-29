@@ -7,8 +7,9 @@ mainEntry:
   store i32 0, i32* %a, align 4
   %count = alloca i32, align 4
   store i32 0, i32* %count, align 4
+  br label %left
 
-left:                                             ; No predecessors!
+left:                                             ; preds = %mainEntry
   %a1 = load i32, i32* %a, align 4
   %GT = icmp sgt i32 %a1, 0
   %GT2 = zext i1 %GT to i32

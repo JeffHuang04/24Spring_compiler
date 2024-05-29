@@ -329,12 +329,12 @@ public class myVisitor extends SysYParserBaseVisitor<LLVMValueRef> {
 				LLVMBuildBr(builder, result);
 				LLVMPositionBuilderAtEnd(builder, result);
 				LLVMValueRef phiNode = LLVMBuildPhi(builder, LLVMInt1Type(), "Phi");
-				LLVMValueRef[] Values ;
-				if (ctx.AND()!=null){
-					Values = new LLVMValueRef[]{LLVMFALSE, rightI1};
-				}else {
-					Values = new LLVMValueRef[]{LLVMTRUE, rightI1};
-				}
+				LLVMValueRef[] Values = new LLVMValueRef[]{leftI1, rightI1};;
+//				if (ctx.AND()!=null){
+//					Values = new LLVMValueRef[]{LLVMFALSE, rightI1};
+//				}else {
+//					Values = new LLVMValueRef[]{LLVMTRUE, rightI1};
+//				}
 				LLVMBasicBlockRef[] Blocks = new LLVMBasicBlockRef[]{leftBlock, rightBlock};
 				LLVMAddIncoming(phiNode, new PointerPointer<>(Values), new PointerPointer<>(Blocks), 2);
 				return LLVMBuildZExt(builder, phiNode, i32Type, "ANDOR");
