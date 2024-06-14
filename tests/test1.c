@@ -1,8 +1,8 @@
+const int a = 1;
+int b;
 int main(){
-    int a=0;
-    int count=0;
-    if(a>0||count>0){
-        a = 1;
-    }
-    return count;
+    int c = 3;
+    b = c + a + 1;
+    const int d = 10;
+    return a + b + c + d;
 }

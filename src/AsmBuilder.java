@@ -23,6 +23,30 @@ public class AsmBuilder {
 		buffer.append(String.format("%s:\n", lbl));
 	}
 
+	public void string(String str){
+		buffer.append(String.format("%s\n",str));
+	}
+
+	public void data(){
+		buffer.append("  .data\n");
+	}
+
+	public void text(){
+		buffer.append("  .text\n");
+	}
+
+	public void global(String fucName) {
+		buffer.append(String.format("  .globl %s\n", fucName));
+	}
+
+	public void nextLine(){
+		buffer.append("\n");
+	}
+
+	public void word(int value){
+		buffer.append(String.format("  .word  %d\n",value));
+	}
+
 	public String getRiscV() {
 		return buffer.toString();
 	}

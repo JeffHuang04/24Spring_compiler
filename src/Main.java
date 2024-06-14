@@ -23,6 +23,7 @@ public class Main
         }
         String source = args[0];
         String output = args[1];
+//        String llvm = args[2];
         CharStream input = CharStreams.fromFileName(source);
         SysYLexer sysYLexer = new SysYLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(sysYLexer);
@@ -31,7 +32,7 @@ public class Main
         myVisitor visitor = new myVisitor();
         visitor.visit(tree);
 //        throw new Exception(tree.getText());
-//        if (LLVMPrintModuleToFile(myVisitor.getModule(), output, error) != 0) {    // module是你自定义的LLVMModuleRef对象
+//        if (LLVMPrintModuleToFile(myVisitor.getModule(), llvm, error) != 0) {    // module是你自定义的LLVMModuleRef对象
 //            LLVMDisposeMessage(error);
 //        }
         LLVMModuleRef module = myVisitor.getModule();
