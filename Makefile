@@ -45,3 +45,6 @@ submit: clean
 
 genIr:
 	clang -S -emit-llvm tests/test1.c -o tests/Expect.ll -O0
+
+rars:
+	java -jar ../rars/rars.jar tests/riscv.asm ic

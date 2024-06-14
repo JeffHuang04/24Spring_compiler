@@ -24,9 +24,9 @@ right:                                            ; preds = %left
   br label %result
 
 result:                                           ; preds = %right, %left
-  %Phi = phi i1 [ true, %left ], [ %cond6, %right ]
-  %ANDOR = zext i1 %Phi to i32
-  %cond7 = icmp ne i32 %ANDOR, 0
+  %Phi = phi i1 [ %cond, %left ], [ %cond6, %right ]
+  %OR = zext i1 %Phi to i32
+  %cond7 = icmp ne i32 %OR, 0
   br i1 %cond7, label %if_true, label %if_false
 
 if_true:                                          ; preds = %result
