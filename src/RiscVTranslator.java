@@ -1,5 +1,4 @@
 import org.bytedeco.llvm.LLVM.*;
-import org.bytedeco.llvm.global.LLVM;
 
 import java.util.Objects;
 
@@ -35,14 +34,29 @@ public class RiscVTranslator {
 				asmBuilder.global(funcName);
 			}
 			asmBuilder.label(funcName);
-			asmBuilder.word(cmpVarNum(func));
+			int spSpace = cmpVarNumber(func)*4;
+			if (spSpace % 16 != 0) {
+				spSpace = ((spSpace / 16) + 1) * 16;
+			}
+			spSpace = spSpace*(-1);
+			asmBuilder.addi("sp","sp",String.valueOf(spSpace));
 			for (LLVMBasicBlockRef bb = LLVMGetFirstBasicBlock(func); bb != null; bb = LLVMGetNextBasicBlock(bb)) {
 				String bbName = LLVMGetBasicBlockName(bb).getString();
 				asmBuilder.label(bbName);
+				for (LLVMValueRef inst = LLVMGetFirstInstruction(bb); inst != null; inst = LLVMGetNextInstruction(inst)) {
+					if (LLVMGetInstructionOpcode(inst) == LLVMRet){
+						LLVMValueRef returnValue = LLVMGetOperand(inst,0);
+						int returnValueInt = (int) LLVMConstIntGetSExtValue(returnValue);
+						asmBuilder.li("a0",returnValueInt);
+						asmBuilder.addi("sp","sp",String.valueOf(spSpace*(-1)));
+						asmBuilder.li("a7",93);
+						asmBuilder.ecall();
+					}
+				}
 			}
 		}
 	}
-	private int cmpVarNum(LLVMValueRef func){
+	private int cmpVarNumber(LLVMValueRef func){
 		int num = 0;
 		for (LLVMBasicBlockRef bb = LLVMGetFirstBasicBlock(func); bb != null; bb = LLVMGetNextBasicBlock(bb)) {
 			for (LLVMValueRef inst = LLVMGetFirstInstruction(bb); inst != null; inst = LLVMGetNextInstruction(inst)) {

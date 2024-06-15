@@ -27,6 +27,18 @@ public class AsmBuilder {
 		buffer.append(String.format("%s\n",str));
 	}
 
+	public void addi(String dest,String lhs,String rhs){
+		buffer.append(String.format("  addi %s, %s, %s\n", dest, lhs, rhs));
+	}
+
+	public void li(String dest,int immediate){
+		buffer.append(String.format("  li %s, %d\n", dest,immediate));
+	}
+
+	public void ecall(){
+		buffer.append("  ecall");
+	}
+
 	public void data(){
 		buffer.append("  .data\n");
 	}
