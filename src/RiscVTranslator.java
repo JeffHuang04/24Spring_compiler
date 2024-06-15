@@ -8,10 +8,11 @@ import static org.bytedeco.llvm.global.LLVM.LLVMGetFirstGlobal;
 public class RiscVTranslator {
 	private LLVMModuleRef module;
 	private AsmBuilder asmBuilder;
-
+	private RegisterAllocator allocator;
 	public RiscVTranslator(LLVMModuleRef module){
 		this.module = module;
 		this.asmBuilder = new AsmBuilder();
+		this.allocator = new SpAllocator();
 	}
 
 	public void translate(){
@@ -34,7 +35,7 @@ public class RiscVTranslator {
 				asmBuilder.global(funcName);
 			}
 			asmBuilder.label(funcName);
-			int spSpace = cmpVarNumber(func)*4;
+			int spSpace = allocator.getStackSize(func)*4;
 			if (spSpace % 16 != 0) {
 				spSpace = ((spSpace / 16) + 1) * 16;
 			}
@@ -55,19 +56,6 @@ public class RiscVTranslator {
 				}
 			}
 		}
-	}
-	private int cmpVarNumber(LLVMValueRef func){
-		int num = 0;
-		for (LLVMBasicBlockRef bb = LLVMGetFirstBasicBlock(func); bb != null; bb = LLVMGetNextBasicBlock(bb)) {
-			for (LLVMValueRef inst = LLVMGetFirstInstruction(bb); inst != null; inst = LLVMGetNextInstruction(inst)) {
-				if (LLVMGetInstructionOpcode(inst) == LLVMRet
-				|| LLVMGetInstructionOpcode(inst) == LLVMStore){
-					continue;
-				}
-				num++;
-			}
-		}
-		return num;
 	}
 	public String getAsm(){
 		return asmBuilder.getRiscV();
