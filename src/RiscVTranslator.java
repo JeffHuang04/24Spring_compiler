@@ -1,4 +1,5 @@
 import org.bytedeco.llvm.LLVM.*;
+import org.bytedeco.llvm.global.LLVM;
 
 import java.util.Objects;
 import java.util.Set;
@@ -91,15 +92,12 @@ public class RiscVTranslator {
 						}
 						int valueFinal = allocator.findOffset(inst);
 						asmBuilder.sw("t0",valueFinal,"sp");
-					} else if (LLVMGetInstructionOpcode(inst) == LLVMAdd){
+					} else if (LLVMGetInstructionOpcode(inst) == LLVMAdd||
+					LLVMGetInstructionOpcode(inst) == LLVMSub||
+					LLVMGetInstructionOpcode(inst) == LLVMMul||
+					LLVMGetInstructionOpcode(inst) == LLVMSDiv||
+					LLVMGetInstructionOpcode(inst) == LLVMSRem){
 						allocator.allocate(inst);
-//						LLVMValueRef op1 = LLVMGetOperand(inst, 0);
-//						int value1 = allocator.findOffset(op1);
-//						asmBuilder.lw("t0",value1,"sp");
-//						LLVMValueRef op2 = LLVMGetOperand(inst, 1);
-//						int value2 = allocator.findOffset(op2);
-//						asmBuilder.lw("t1",value2,"sp");
-//						asmBuilder.addi("t0","t0","t1");
 						for(int i = 0; i < 2;i ++){
 							LLVMValueRef opi = LLVMGetOperand(inst,i);
 							if (LLVMIsAConstantInt(opi) != null){//是立即数
@@ -110,7 +108,17 @@ public class RiscVTranslator {
 								asmBuilder.lw("t"+i,valuei,"sp");
 							}
 						}
-						asmBuilder.add("t0","t0","t1");
+						if (LLVMGetInstructionOpcode(inst) == LLVMAdd) {
+							asmBuilder.op2("add","t0", "t0", "t1");
+						} else if (LLVMGetInstructionOpcode(inst) == LLVMSub) {
+							asmBuilder.op2("sub","t0", "t0", "t1");
+						} else if (LLVMGetInstructionOpcode(inst) == LLVMMul) {
+							asmBuilder.op2("mul","t0", "t0", "t1");
+						} else if (LLVMGetInstructionOpcode(inst) == LLVMSDiv){
+							asmBuilder.op2("sdiv","t0", "t0", "t1");
+						} else if (LLVMGetInstructionOpcode(inst) == LLVMSRem) {
+							asmBuilder.op2("srem","t0", "t0", "t1");
+						}
 						int valueFinal = allocator.findOffset(inst);
 						asmBuilder.sw("t0",valueFinal,"sp");
 					}
