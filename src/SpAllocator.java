@@ -18,12 +18,12 @@ public class SpAllocator implements RegisterAllocator{
 	}
 
 	public int findOffset(LLVMValueRef value){
-		//return stackOffsets.get(value);
-		Integer offset = stackOffsets.get(value);
-		if (offset == null) {
-			return -1; // 返回 -1 表示未找到
-		}
-		return offset;
+		return stackOffsets.get(value);
+//		Integer offset = stackOffsets.get(value);
+//		if (offset == null) {
+//			return -1; // 返回 -1 表示未找到
+//		}
+//		return offset;
 	}
 
 	@Override

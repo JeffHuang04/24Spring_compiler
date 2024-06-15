@@ -82,14 +82,9 @@ public class RiscVTranslator {
 							int ValueInt = (int) LLVMConstIntGetSExtValue(op1);
 							asmBuilder.li("t0", ValueInt);
 						} else if (LLVMIsAGlobalValue(op1)!=null) {//是全局变量
-							if (allocator.findOffset(op1) == -1) {
-								String globalVarName = LLVMGetValueName(op1).getString();
-								asmBuilder.la("t0", globalVarName);
-								asmBuilder.lw("t0", 0, "t0");
-							}else {
-								int value1 = allocator.findOffset(op1);
-								asmBuilder.lw("t0", value1, "sp");
-							}
+							String globalVarName = LLVMGetValueName(op1).getString();
+							asmBuilder.la("t0", globalVarName);
+							asmBuilder.lw("t0", 0, "t0");
 						} else {//是寄存器
 							int value1 = allocator.findOffset(op1);
 							asmBuilder.lw("t0", value1, "sp");
