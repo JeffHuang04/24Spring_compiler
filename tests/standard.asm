@@ -9,7 +9,7 @@ b:
   .text
   .globl main
 main:
-  addi sp, sp, -64
+  addi sp, sp, -64      # prologue
 mainEntry:
   li t0, 3
   sw t0, 60(sp)
@@ -31,8 +31,7 @@ mainEntry:
   sw t0, 0(t1)
   li t0, 10
   sw t0, 40(sp)
-  la t0, a
-  lw t0, 0(t0)
+  lw t0, 52(sp)
   sw t0, 36(sp)
   la t0, b
   lw t0, 0(t0)
@@ -54,6 +53,6 @@ mainEntry:
   add t0, t0, t1
   sw t0, 12(sp)
   lw a0, 12(sp)
-  addi sp, sp, 64
+  addi sp, sp, 64       # epilogue
   li a7, 93
   ecall

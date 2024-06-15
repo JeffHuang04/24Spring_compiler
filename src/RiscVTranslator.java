@@ -1,6 +1,7 @@
 import org.bytedeco.llvm.LLVM.*;
 
 import java.util.Objects;
+import java.util.Set;
 
 import static org.bytedeco.llvm.global.LLVM.*;
 import static org.bytedeco.llvm.global.LLVM.LLVMGetFirstGlobal;
@@ -8,7 +9,7 @@ import static org.bytedeco.llvm.global.LLVM.LLVMGetFirstGlobal;
 public class RiscVTranslator {
 	private LLVMModuleRef module;
 	private AsmBuilder asmBuilder;
-	private RegisterAllocator allocator;
+	private SpAllocator allocator;
 	public RiscVTranslator(LLVMModuleRef module){
 		this.module = module;
 		this.asmBuilder = new AsmBuilder();
@@ -35,10 +36,7 @@ public class RiscVTranslator {
 				asmBuilder.global(funcName);
 			}
 			asmBuilder.label(funcName);
-			int spSpace = allocator.getStackSize(func)*4;
-			if (spSpace % 16 != 0) {
-				spSpace = ((spSpace / 16) + 1) * 16;
-			}
+			int spSpace = allocator.getStackSize(func);
 			spSpace = spSpace*(-1);
 			asmBuilder.addi("sp","sp",String.valueOf(spSpace));
 			for (LLVMBasicBlockRef bb = LLVMGetFirstBasicBlock(func); bb != null; bb = LLVMGetNextBasicBlock(bb)) {
@@ -47,11 +45,79 @@ public class RiscVTranslator {
 				for (LLVMValueRef inst = LLVMGetFirstInstruction(bb); inst != null; inst = LLVMGetNextInstruction(inst)) {
 					if (LLVMGetInstructionOpcode(inst) == LLVMRet){
 						LLVMValueRef returnValue = LLVMGetOperand(inst,0);
-						int returnValueInt = (int) LLVMConstIntGetSExtValue(returnValue);
-						asmBuilder.li("a0",returnValueInt);
+						if (LLVMIsAConstantInt(returnValue) != null) {//ret返回的是立即数
+							int returnValueInt = (int) LLVMConstIntGetSExtValue(returnValue);
+							asmBuilder.li("a0", returnValueInt);
+						}else {
+							int value = allocator.findOffset(returnValue);
+							asmBuilder.lw("a0", value, "sp");
+						}
 						asmBuilder.addi("sp","sp",String.valueOf(spSpace*(-1)));
 						asmBuilder.li("a7",93);
 						asmBuilder.ecall();
+					} else if (LLVMGetInstructionOpcode(inst) == LLVMAlloca){
+						allocator.allocate(inst);
+					} else if (LLVMGetInstructionOpcode(inst) == LLVMStore){//2个参数
+						LLVMValueRef op1 = LLVMGetOperand(inst, 0);
+						if (LLVMIsAConstantInt(op1) != null){//是立即数
+							int ValueInt = (int) LLVMConstIntGetSExtValue(op1);
+							asmBuilder.li("t0", ValueInt);
+						} else {//是寄存器
+							int value1 = allocator.findOffset(op1);
+							asmBuilder.lw("t0",value1,"sp");
+						}//op1不可能是全局变量，op1相当于右值，而全局变量当右值的时候会先load
+						LLVMValueRef op2 = LLVMGetOperand(inst, 1);
+						if (LLVMIsAGlobalValue(op2)!=null){//是全局变量
+							String globalVarName = LLVMGetValueName(op2).getString();
+							asmBuilder.la("t1",globalVarName);
+							asmBuilder.sw("t0",0,"t1");
+						}else {//是寄存器
+							int value = allocator.findOffset(op2);
+							asmBuilder.sw("t0", value, "sp");
+						}
+					} else if (LLVMGetInstructionOpcode(inst) == LLVMLoad) {//1个参数
+						allocator.allocate(inst);
+						LLVMValueRef op1 = LLVMGetOperand(inst, 0);
+						if (LLVMIsAConstantInt(op1) != null){//是立即数
+							int ValueInt = (int) LLVMConstIntGetSExtValue(op1);
+							asmBuilder.li("t0", ValueInt);
+						} else if (LLVMIsAGlobalValue(op1)!=null) {//是全局变量
+							if (allocator.findOffset(op1) == -1) {
+								String globalVarName = LLVMGetValueName(op1).getString();
+								asmBuilder.la("t0", globalVarName);
+								asmBuilder.lw("t0", 0, "t0");
+							}else {
+								int value1 = allocator.findOffset(op1);
+								asmBuilder.lw("t0", value1, "sp");
+							}
+						} else {//是寄存器
+							int value1 = allocator.findOffset(op1);
+							asmBuilder.lw("t0", value1, "sp");
+						}
+						int valueFinal = allocator.findOffset(inst);
+						asmBuilder.sw("t0",valueFinal,"sp");
+					} else if (LLVMGetInstructionOpcode(inst) == LLVMAdd){
+						allocator.allocate(inst);
+//						LLVMValueRef op1 = LLVMGetOperand(inst, 0);
+//						int value1 = allocator.findOffset(op1);
+//						asmBuilder.lw("t0",value1,"sp");
+//						LLVMValueRef op2 = LLVMGetOperand(inst, 1);
+//						int value2 = allocator.findOffset(op2);
+//						asmBuilder.lw("t1",value2,"sp");
+//						asmBuilder.addi("t0","t0","t1");
+						for(int i = 0; i < 2;i ++){
+							LLVMValueRef opi = LLVMGetOperand(inst,i);
+							if (LLVMIsAConstantInt(opi) != null){//是立即数
+								int ValueInt = (int) LLVMConstIntGetSExtValue(opi);
+								asmBuilder.li("t"+i, ValueInt);
+							}else {//是寄存器，不可能是全局变量，全局变量先要load成寄存器
+								int valuei = allocator.findOffset(opi);
+								asmBuilder.lw("t"+i,valuei,"sp");
+							}
+						}
+						asmBuilder.add("t0","t0","t1");
+						int valueFinal = allocator.findOffset(inst);
+						asmBuilder.sw("t0",valueFinal,"sp");
 					}
 				}
 			}

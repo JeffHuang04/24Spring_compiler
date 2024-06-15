@@ -31,10 +31,22 @@ public class AsmBuilder {
 		buffer.append(String.format("  addi %s, %s, %s\n", dest, lhs, rhs));
 	}
 
+	public void add(String dest,String lhs,String rhs){
+		buffer.append(String.format("  add %s, %s, %s\n", dest, lhs, rhs));
+	}
+
 	public void li(String dest,int immediate){
 		buffer.append(String.format("  li %s, %d\n", dest,immediate));
 	}
-
+	public void la(String dest,String globalName){
+		buffer.append(String.format("  la %s, %s\n", dest,globalName));
+	}
+	public void lw(String dest, int offset,String src ){
+		buffer.append(String.format("  lw %s, %d(%s)\n", dest,offset,src));
+	}
+	public void sw(String dest, int offset,String src ){
+		buffer.append(String.format("  sw %s, %d(%s)\n", dest,offset,src));
+	}
 	public void ecall(){
 		buffer.append("  ecall");
 	}
@@ -56,7 +68,7 @@ public class AsmBuilder {
 	}
 
 	public void word(int value){
-		buffer.append(String.format("  .word  %d\n",value));
+		buffer.append(String.format("  .word %d\n",value));
 	}
 
 	public String getRiscV() {
