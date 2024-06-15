@@ -115,9 +115,9 @@ public class RiscVTranslator {
 						} else if (LLVMGetInstructionOpcode(inst) == LLVMMul) {
 							asmBuilder.op2("mul","t0", "t0", "t1");
 						} else if (LLVMGetInstructionOpcode(inst) == LLVMSDiv){
-							asmBuilder.op2("sdiv","t0", "t0", "t1");
+							asmBuilder.op2("div","t0", "t0", "t1");
 						} else if (LLVMGetInstructionOpcode(inst) == LLVMSRem) {
-							asmBuilder.op2("srem","t0", "t0", "t1");
+							asmBuilder.op2("rem","t0", "t0", "t1");
 						}
 						int valueFinal = allocator.findOffset(inst);
 						asmBuilder.sw("t0",valueFinal,"sp");
