@@ -41,6 +41,11 @@ public class AsmBuilder {
 	public void la(String dest,String globalName){
 		buffer.append(String.format("  la %s, %s\n", dest,globalName));
 	}
+
+	public void mv(String dest,String src){
+		buffer.append(String.format("  mv %s, %s\n", dest,src));
+	}
+
 	public void lw(String dest, int offset,String src ){
 		buffer.append(String.format("  lw %s, %d(%s)\n", dest,offset,src));
 	}

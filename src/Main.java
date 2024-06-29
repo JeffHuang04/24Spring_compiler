@@ -31,12 +31,12 @@ public class Main
         ParseTree tree = sysYParser.program();
         myVisitor visitor = new myVisitor();
         visitor.visit(tree);
-//        throw new Exception(tree.getText());
 //        if (LLVMPrintModuleToFile(myVisitor.getModule(), llvm, error) != 0) {    // module是你自定义的LLVMModuleRef对象
 //            LLVMDisposeMessage(error);
 //        }
         LLVMModuleRef module = myVisitor.getModule();
-        RiscVTranslator translator = new RiscVTranslator(module);
+        RiscVTranslatorSp translator = new RiscVTranslatorSp(module);//仅用栈来分配变量
+        //RiscVTranslatorLinearScan translator = new RiscVTranslatorLinearScan(module);//线性寄存器分配算法
         translator.translate();
         String asm = translator.getAsm();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(output))) {

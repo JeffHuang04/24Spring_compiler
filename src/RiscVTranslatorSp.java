@@ -1,17 +1,15 @@
 import org.bytedeco.llvm.LLVM.*;
-import org.bytedeco.llvm.global.LLVM;
 
 import java.util.Objects;
-import java.util.Set;
 
 import static org.bytedeco.llvm.global.LLVM.*;
 import static org.bytedeco.llvm.global.LLVM.LLVMGetFirstGlobal;
 
-public class RiscVTranslator {
+public class RiscVTranslatorSp {
 	private LLVMModuleRef module;
 	private AsmBuilder asmBuilder;
 	private SpAllocator allocator;
-	public RiscVTranslator(LLVMModuleRef module){
+	public RiscVTranslatorSp(LLVMModuleRef module){
 		this.module = module;
 		this.asmBuilder = new AsmBuilder();
 		this.allocator = new SpAllocator();
@@ -37,7 +35,7 @@ public class RiscVTranslator {
 				asmBuilder.global(funcName);
 			}
 			asmBuilder.label(funcName);
-			int spSpace = allocator.getStackSize(func);
+			int spSpace = allocator.getStackSize1(func);
 			spSpace = spSpace*(-1);
 			asmBuilder.addi("sp","sp",String.valueOf(spSpace));
 			for (LLVMBasicBlockRef bb = LLVMGetFirstBasicBlock(func); bb != null; bb = LLVMGetNextBasicBlock(bb)) {
@@ -50,21 +48,21 @@ public class RiscVTranslator {
 							int returnValueInt = (int) LLVMConstIntGetSExtValue(returnValue);
 							asmBuilder.li("a0", returnValueInt);
 						}else {
-							int value = allocator.findOffset(returnValue);
+							int value = allocator.findOffset1(returnValue);
 							asmBuilder.lw("a0", value, "sp");
 						}
 						asmBuilder.addi("sp","sp",String.valueOf(spSpace*(-1)));
 						asmBuilder.li("a7",93);
 						asmBuilder.ecall();
 					} else if (LLVMGetInstructionOpcode(inst) == LLVMAlloca){
-						allocator.allocate(inst);
+						allocator.allocate1(inst);
 					} else if (LLVMGetInstructionOpcode(inst) == LLVMStore){//2个参数
 						LLVMValueRef op1 = LLVMGetOperand(inst, 0);
 						if (LLVMIsAConstantInt(op1) != null){//是立即数
 							int ValueInt = (int) LLVMConstIntGetSExtValue(op1);
 							asmBuilder.li("t0", ValueInt);
 						} else {//是寄存器
-							int value1 = allocator.findOffset(op1);
+							int value1 = allocator.findOffset1(op1);
 							asmBuilder.lw("t0",value1,"sp");
 						}//op1不可能是全局变量，op1相当于右值，而全局变量当右值的时候会先load
 						LLVMValueRef op2 = LLVMGetOperand(inst, 1);
@@ -73,38 +71,39 @@ public class RiscVTranslator {
 							asmBuilder.la("t1",globalVarName);
 							asmBuilder.sw("t0",0,"t1");
 						}else {//是寄存器
-							int value = allocator.findOffset(op2);
+							int value = allocator.findOffset1(op2);
 							asmBuilder.sw("t0", value, "sp");
 						}
 					} else if (LLVMGetInstructionOpcode(inst) == LLVMLoad) {//1个参数
-						allocator.allocate(inst);
+						allocator.allocate1(inst);
 						LLVMValueRef op1 = LLVMGetOperand(inst, 0);
-						if (LLVMIsAConstantInt(op1) != null){//是立即数
-							int ValueInt = (int) LLVMConstIntGetSExtValue(op1);
-							asmBuilder.li("t0", ValueInt);
-						} else if (LLVMIsAGlobalValue(op1)!=null) {//是全局变量
+//						if (LLVMIsAConstantInt(op1) != null){//是立即数
+//							int ValueInt = (int) LLVMConstIntGetSExtValue(op1);
+//							asmBuilder.li("t0", ValueInt);
+//						} else
+							if (LLVMIsAGlobalValue(op1)!=null) {//是全局变量
 							String globalVarName = LLVMGetValueName(op1).getString();
 							asmBuilder.la("t0", globalVarName);
 							asmBuilder.lw("t0", 0, "t0");
 						} else {//是寄存器
-							int value1 = allocator.findOffset(op1);
+							int value1 = allocator.findOffset1(op1);
 							asmBuilder.lw("t0", value1, "sp");
 						}
-						int valueFinal = allocator.findOffset(inst);
+						int valueFinal = allocator.findOffset1(inst);
 						asmBuilder.sw("t0",valueFinal,"sp");
 					} else if (LLVMGetInstructionOpcode(inst) == LLVMAdd||
 					LLVMGetInstructionOpcode(inst) == LLVMSub||
 					LLVMGetInstructionOpcode(inst) == LLVMMul||
 					LLVMGetInstructionOpcode(inst) == LLVMSDiv||
 					LLVMGetInstructionOpcode(inst) == LLVMSRem){
-						allocator.allocate(inst);
+						allocator.allocate1(inst);
 						for(int i = 0; i < 2;i ++){
 							LLVMValueRef opi = LLVMGetOperand(inst,i);
 							if (LLVMIsAConstantInt(opi) != null){//是立即数
 								int ValueInt = (int) LLVMConstIntGetSExtValue(opi);
 								asmBuilder.li("t"+i, ValueInt);
 							}else {//是寄存器，不可能是全局变量，全局变量先要load成寄存器
-								int valuei = allocator.findOffset(opi);
+								int valuei = allocator.findOffset1(opi);
 								asmBuilder.lw("t"+i,valuei,"sp");
 							}
 						}
@@ -119,7 +118,7 @@ public class RiscVTranslator {
 						} else if (LLVMGetInstructionOpcode(inst) == LLVMSRem) {
 							asmBuilder.op2("rem","t0", "t0", "t1");
 						}
-						int valueFinal = allocator.findOffset(inst);
+						int valueFinal = allocator.findOffset1(inst);
 						asmBuilder.sw("t0",valueFinal,"sp");
 					}
 				}
