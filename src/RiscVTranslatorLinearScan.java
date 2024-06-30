@@ -1,6 +1,4 @@
 import org.bytedeco.llvm.LLVM.*;
-
-import java.util.IllegalFormatCodePointException;
 import java.util.Objects;
 
 import static org.bytedeco.llvm.global.LLVM.*;
