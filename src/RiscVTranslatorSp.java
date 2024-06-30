@@ -81,7 +81,7 @@ public class RiscVTranslatorSp {
 //							int ValueInt = (int) LLVMConstIntGetSExtValue(op1);
 //							asmBuilder.li("t0", ValueInt);
 //						} else
-							if (LLVMIsAGlobalValue(op1)!=null) {//是全局变量
+						if (LLVMIsAGlobalValue(op1)!=null) {//是全局变量
 							String globalVarName = LLVMGetValueName(op1).getString();
 							asmBuilder.la("t0", globalVarName);
 							asmBuilder.lw("t0", 0, "t0");

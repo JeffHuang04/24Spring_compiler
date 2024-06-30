@@ -32,9 +32,6 @@ public class LinearScanAllocator {
 		intervals.sort(Comparator.comparingInt(i -> i.start));//按照生命周期起点排序
 		List<String> freeRegisters = new ArrayList<>(AVAILABLE_REGISTERS);
 		List<Interval> active = new ArrayList<>();//活跃区间
-		for (Interval interval: intervals){
-			expireOldIntervals(active,interval,freeRegisters);
-		}
 		for (Interval interval: intervals) {
 			expireOldIntervals(active, interval,freeRegisters);
 			if (active.size() == AVAILABLE_REGISTERS.size()){
@@ -51,9 +48,11 @@ public class LinearScanAllocator {
 	public void genIntervals(LLVMValueRef func){
 		for (LLVMBasicBlockRef bb = LLVMGetFirstBasicBlock(func); bb != null; bb = LLVMGetNextBasicBlock(bb)) {
 			for (LLVMValueRef inst = LLVMGetFirstInstruction(bb); inst != null; inst = LLVMGetNextInstruction(inst)) {
-				int startPoint = lifeTimeAnalysis.getStartPoint(inst);
-				int endPoint = lifeTimeAnalysis.getEndPoint(inst);
-				intervals.add(new Interval(inst,startPoint,endPoint));
+				if (LLVMGetInstructionOpcode(inst) != LLVMStore) {//store的返回值没有用处
+					int startPoint = lifeTimeAnalysis.getStartPoint(inst);
+					int endPoint = lifeTimeAnalysis.getEndPoint(inst);
+					intervals.add(new Interval(inst, startPoint, endPoint));
+				}
 			}
 		}
 	}
@@ -69,9 +68,9 @@ public class LinearScanAllocator {
 				return;
 			}//如果当中的某一个节点的结束节点大于等于当前的开始节点则退出
 			iterator.remove();
-			freeRegisters.add(registerMap.remove(j.value));
+			freeRegisters.add(registerMap.get(j.value));//不应该删掉
 		}
-	}
+	}//迭代器使用参考chatgpt
 
 	private void spillAtInterval(Interval interval, List<Interval> active){
 		Interval spill = active.get(active.size() - 1);

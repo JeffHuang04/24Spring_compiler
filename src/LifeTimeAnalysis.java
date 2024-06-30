@@ -18,11 +18,13 @@ public class LifeTimeAnalysis {
 				int count = instructionCount.getInstructionCount(inst);
 				for (int i = 0; i < LLVMGetNumOperands(inst);i++){
 					LLVMValueRef op = LLVMGetOperand(inst,i);
-					startPoints.putIfAbsent(op,count);//只计算第一次的
-					endPoints.put(op,count);//永远更新中
+					startPoints.putIfAbsent(op, count);//只计算第一次的
+					endPoints.put(op, count);//永远更新中
 				}
-				startPoints.putIfAbsent(inst,count);
-				endPoints.put(inst,count);
+				if (LLVMGetInstructionOpcode(inst) != LLVMStore) {
+					startPoints.putIfAbsent(inst, count);
+					endPoints.put(inst, count);
+				}
 			}
 		}
 	}
