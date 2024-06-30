@@ -123,6 +123,7 @@ mainEntry:
   mv a6, t0
   li t0, 20
   mv a7, t0
+
   la t0, x
   lw t0, 0(t0)
   mv t2, t0
